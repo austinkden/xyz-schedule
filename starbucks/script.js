@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return hours * 60 + minutes;
     }
 
-    // Helper: Calculate shift duration in hours
+    // Helper: Calculate shift duration and format as text (e.g. "4h 15m")
     function calculateDuration(start, end) {
         const startMins = parseTimeToMinutes(start);
         const endMins = parseTimeToMinutes(end);
@@ -85,8 +85,18 @@ document.addEventListener('DOMContentLoaded', () => {
             diffMins += 24 * 60; // Handle overnight shifts
         }
         
-        const hours = diffMins / 60;
-        return hours % 1 === 0 ? hours.toFixed(0) : hours.toFixed(1);
+        const hours = Math.floor(diffMins / 60);
+        const minutes = diffMins % 60;
+        
+        const parts = [];
+        if (hours > 0) {
+            parts.push(`${hours}h`);
+        }
+        if (minutes > 0) {
+            parts.push(`${minutes}m`);
+        }
+        
+        return parts.length > 0 ? parts.join(' ') : '0m';
     }
 
     // Helper: Format date for detailed view
@@ -179,8 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
             detailsDate.textContent = formatLongDate(dateStr);
             detailsTime.textContent = `${formatTime(shift.start, is24h)} - ${formatTime(shift.end, is24h)}`;
             
-            const hours = calculateDuration(shift.start, shift.end);
-            detailsDuration.textContent = `(${hours} hrs)`;
+            const durationText = calculateDuration(shift.start, shift.end);
+            detailsDuration.textContent = `(${durationText})`;
             
             if (shift.notes) {
                 detailsNotes.textContent = shift.notes;
@@ -340,8 +350,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const durationEl = document.createElement('span');
                 durationEl.className = 'agenda-duration';
-                const hours = calculateDuration(shift.start, shift.end);
-                durationEl.textContent = `${hours} hrs`;
+                const durationText = calculateDuration(shift.start, shift.end);
+                durationEl.textContent = durationText;
                 timeEl.appendChild(durationEl);
                 
                 const notesEl = document.createElement('div');
