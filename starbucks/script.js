@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailsPlaceholder = document.getElementById('details-placeholder');
     const detailsContent = document.getElementById('details-content');
     const detailsDate = document.getElementById('details-date');
-    const detailsBadge = document.getElementById('details-badge');
     const detailsTime = document.getElementById('details-time');
     const detailsDuration = document.getElementById('details-duration');
     const detailsNotes = document.getElementById('details-notes');
@@ -172,15 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const schedule = window.STARBUCKS_SCHEDULE || {};
         const shift = schedule[dateStr];
 
-        detailsPlaceholder.classList.add('hidden');
-        detailsContent.classList.remove('hidden');
-        detailsDate.textContent = formatLongDate(dateStr);
-
         const is24h = (timeFormat === '24h');
 
         if (shift) {
-            detailsBadge.textContent = "Shift Scheduled";
-            detailsBadge.className = "status-badge";
+            detailsPlaceholder.classList.add('hidden');
+            detailsContent.classList.remove('hidden');
+            detailsDate.textContent = formatLongDate(dateStr);
             detailsTime.textContent = `${formatTime(shift.start, is24h)} - ${formatTime(shift.end, is24h)}`;
             
             const hours = calculateDuration(shift.start, shift.end);
@@ -193,12 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 detailsNotesRow.style.display = 'none';
             }
         } else {
-            detailsBadge.textContent = "Day Off";
-            detailsBadge.className = "status-badge off-badge";
-            detailsTime.textContent = "None";
-            detailsDuration.textContent = "";
-            detailsNotes.textContent = "No shifts scheduled. Enjoy the day off!";
-            detailsNotesRow.style.display = 'flex';
+            detailsPlaceholder.classList.remove('hidden');
+            detailsContent.classList.add('hidden');
         }
     }
 
