@@ -97,7 +97,7 @@ body {
     position: fixed;
     top: 30px;
     left: 30px;
-    z-index: 1;
+    z-index: 1000;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
