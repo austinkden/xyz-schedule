@@ -1,5 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,slnt,wdth,wght,GRAD,ROND@6..144,-10..0,25..151,1..1000,0..100,0..100&display=swap');
 
+:root {
+    /* Consistent Color variables mapped from palette.css */
+    --background: #121016;
+    --surface: #1d1b20;
+    --surface-variant: #2d2a33;
+    --primary: #8859ff;
+    --primary-container: #4527a0;
+    --on-primary: #ffffff;
+    --on-surface: #e6e1e5;
+    --on-surface-variant: #cac4d0;
+    --outline: #49454f;
+    --highlight-color: #8859ff;
+    --highlight-bg: #f2edff;
+    
+    /* Starbucks accent colors using the unified purple theme */
+    --brand-green: var(--primary);
+    --brand-green-container: var(--primary-container);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -12,11 +31,40 @@
 }
 
 *::selection {
-    color: #8859ff;
-    background: #f2edff;
+    color: var(--highlight-color);
+    background: var(--highlight-bg);
 }
 
-.back-link, .logo, .navigation-controls, #current-month-year, button, .weekdays-grid, .weekdays-grid div, .day-cell, .day-number, .shift-tag, .status-badge, .detail-label, .brand, .brand h1, .subtitle, .settings-toggle, .settings-tray, .settings-label, .toggle-group, .toggle-option, .view-switcher-container, .view-switcher, .switcher-btn, .agenda-date-info, .agenda-weekday, .agenda-day, #details-date, .details-placeholder, img, svg {
+.back-link, 
+.logo, 
+.navigation-controls, 
+#current-month-year, 
+button, 
+.weekdays-grid, 
+.weekdays-grid div, 
+.day-cell, 
+.day-number, 
+.shift-tag, 
+.status-badge, 
+.detail-label, 
+.brand, 
+.brand h1, 
+.subtitle, 
+.settings-toggle, 
+.settings-tray, 
+.settings-label, 
+.toggle-group, 
+.toggle-option, 
+.view-switcher-container, 
+.view-switcher, 
+.switcher-btn, 
+.agenda-date-info, 
+.agenda-weekday, 
+.agenda-day, 
+#details-date, 
+.details-placeholder, 
+img, 
+svg {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
@@ -24,8 +72,8 @@
 
 body {
     min-height: 100vh;
-    background: #121212;
-    color: #f2edff;
+    background: var(--background);
+    color: var(--on-surface);
     font-family: 'Google Sans Flex', sans-serif;
     display: flex;
     justify-content: center;
@@ -49,7 +97,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    color: #bfaaff;
+    color: var(--on-surface-variant);
     text-decoration: none;
     font-size: 0.95rem;
     font-weight: 500;
@@ -57,7 +105,7 @@ body {
 }
 
 .back-link:hover {
-    color: #ffffff;
+    color: var(--on-surface);
 }
 
 .calendar-header {
@@ -75,7 +123,7 @@ body {
 }
 
 .logo {
-    color: #8859ff;
+    color: var(--brand-green);
     background: #ffffff;
     border-radius: 50%;
     width: 48px;
@@ -83,6 +131,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    border: 2px solid var(--outline);
 }
 
 .logo img {
@@ -101,18 +150,19 @@ body {
 
 .subtitle {
     font-size: 0.85rem;
-    color: #bfaaff;
-    font-weight: 500;
+    color: var(--brand-green);
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
+/* Material 3 Styled Pill Controls */
 .navigation-controls {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface-variant);
+    border: 1px solid var(--outline);
     border-radius: 30px;
     height: 44px;
     padding: 0 0.5rem;
@@ -121,7 +171,7 @@ body {
 .navigation-controls button {
     background: none;
     border: none;
-    color: #bfaaff;
+    color: var(--on-surface-variant);
     cursor: pointer;
     width: 32px;
     height: 32px;
@@ -133,8 +183,8 @@ body {
 }
 
 .navigation-controls button:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
+    color: var(--on-surface);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .navigation-controls button:active {
@@ -148,13 +198,12 @@ body {
     text-align: center;
 }
 
-/* Calendar Card */
+/* Material 3 Expressive Calendar Card */
 .calendar-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 24px;
+    background: var(--surface);
+    border: 1px solid var(--outline);
+    border-radius: 28px;
     padding: 1.5rem;
-    backdrop-filter: blur(10px);
 }
 
 /* Weekdays labels */
@@ -167,8 +216,8 @@ body {
 
 .weekdays-grid div {
     font-size: 0.8rem;
-    font-weight: 600;
-    color: #bfaaff;
+    font-weight: 650;
+    color: var(--on-surface-variant);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 0.5rem 0;
@@ -184,8 +233,8 @@ body {
 /* Individual Day Cell */
 .day-cell {
     aspect-ratio: 1.05;
-    background: rgba(255, 255, 255, 0.015);
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--outline);
     border-radius: 12px;
     padding: 0.5rem;
     display: flex;
@@ -193,26 +242,26 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
     user-select: none;
 }
 
 .day-cell:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: var(--surface-variant);
+    border-color: var(--on-surface-variant);
 }
 
 .day-number {
     font-size: 1rem;
     font-weight: 600;
-    color: #dfdbe5;
+    color: var(--on-surface-variant);
     display: flex;
     justify-content: center;
     align-items: center;
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Adjacent/Previous Month Days */
@@ -226,31 +275,31 @@ body {
 
 /* Today Highlighter */
 .day-cell.today .day-number {
-    border: 2px solid #8859ff;
-    color: #ffffff;
+    border: 2px solid var(--primary);
+    color: var(--on-surface);
 }
 
-/* Day with shift - Purple styling */
+/* Day with shift - Styled in signature purple */
 .day-cell.has-shift {
     background: rgba(136, 89, 255, 0.08);
-    border-color: rgba(136, 89, 255, 0.25);
+    border-color: rgba(136, 89, 255, 0.35);
 }
 
 .day-cell.has-shift:hover {
     background: rgba(136, 89, 255, 0.16);
-    border-color: rgba(136, 89, 255, 0.5);
+    border-color: rgba(136, 89, 255, 0.6);
 }
 
 .day-cell.has-shift .day-number {
-    background: #8859ff;
+    background: var(--brand-green);
     color: #ffffff;
 }
 
 .shift-tag {
     font-size: 0.65rem;
     font-weight: 600;
-    color: #bfaaff;
-    background: rgba(136, 89, 255, 0.15);
+    color: #ffffff;
+    background: var(--brand-green-container);
     border-radius: 4px;
     padding: 2px 4px;
     width: 100%;
@@ -261,23 +310,23 @@ body {
     margin-top: auto;
 }
 
-/* Selected State - Purple */
+/* Selected State */
 .day-cell.selected {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: #8859ff;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
 }
 
 .day-cell.selected.has-shift {
-    background: rgba(136, 89, 255, 0.25);
+    background: rgba(136, 89, 255, 0.22);
+    border-color: var(--primary);
 }
 
 /* Details Panel Card */
 .details-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 24px;
+    background: var(--surface);
+    border: 1px solid var(--outline);
+    border-radius: 28px;
     padding: 1.5rem;
-    backdrop-filter: blur(10px);
     min-height: 120px;
     display: flex;
     flex-direction: column;
@@ -289,7 +338,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #bfaaff;
+    color: var(--on-surface-variant);
     text-align: center;
     font-size: 0.95rem;
 }
@@ -315,7 +364,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--outline);
     padding-bottom: 0.75rem;
     margin-bottom: 1rem;
     flex-wrap: wrap;
@@ -329,7 +378,7 @@ body {
 }
 
 .status-badge {
-    background: #8859ff;
+    background: var(--brand-green);
     color: #ffffff;
     font-size: 0.75rem;
     font-weight: 600;
@@ -339,8 +388,8 @@ body {
 }
 
 .status-badge.off-badge {
-    background: rgba(255, 255, 255, 0.1);
-    color: #bfaaff;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--on-surface-variant);
 }
 
 .details-body {
@@ -357,7 +406,7 @@ body {
 
 .detail-label {
     width: 80px;
-    color: #bfaaff;
+    color: var(--on-surface-variant);
     font-weight: 500;
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -376,14 +425,14 @@ body {
 }
 
 .duration {
-    color: #bfaaff;
+    color: var(--on-surface-variant);
     font-weight: 400;
     font-size: 0.85rem;
 }
 
 .note-val {
     font-style: normal;
-    color: #dfdbe5;
+    color: var(--on-surface-variant);
     font-weight: 400;
 }
 
@@ -397,10 +446,11 @@ body {
     gap: 0.75rem;
 }
 
+/* Material 3 Segmented / Tonal buttons */
 .settings-toggle {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #bfaaff;
+    background: var(--surface-variant);
+    border: 1px solid var(--outline);
+    color: var(--on-surface-variant);
     cursor: pointer;
     width: 44px;
     height: 44px;
@@ -413,10 +463,11 @@ body {
     -webkit-user-select: none;
 }
 
-.settings-toggle:hover, .settings-toggle.active {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+.settings-toggle:hover, 
+.settings-toggle.active {
+    color: var(--on-surface);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--on-surface-variant);
 }
 
 .settings-toggle:active {
@@ -424,8 +475,8 @@ body {
 }
 
 .settings-tray {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--surface);
+    border: 1px solid var(--outline);
     border-radius: 16px;
     padding: 0.75rem 1rem;
     margin-bottom: 0.5rem;
@@ -449,7 +500,7 @@ body {
 .settings-label {
     font-size: 0.75rem;
     font-weight: 700;
-    color: #bfaaff;
+    color: var(--on-surface-variant);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -457,7 +508,7 @@ body {
 .toggle-group {
     display: flex;
     background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--outline);
     border-radius: 20px;
     padding: 2px;
 }
@@ -465,10 +516,10 @@ body {
 .toggle-option {
     background: none;
     border: none;
-    color: #bfaaff;
+    color: var(--on-surface-variant);
     font-size: 0.7rem;
     font-weight: 700;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 18px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -477,12 +528,12 @@ body {
 }
 
 .toggle-option:hover {
-    color: #ffffff;
+    color: var(--on-surface);
 }
 
 .toggle-option.active {
-    background: #ffffff;
-    color: #121212;
+    background: var(--primary);
+    color: #ffffff;
 }
 
 /* View Switcher */
@@ -495,7 +546,7 @@ body {
 .view-switcher {
     display: flex;
     background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--outline);
     border-radius: 20px;
     padding: 2px;
 }
@@ -503,7 +554,7 @@ body {
 .switcher-btn {
     background: none;
     border: none;
-    color: #bfaaff;
+    color: var(--on-surface-variant);
     font-size: 0.75rem;
     font-weight: 700;
     padding: 5px 12px;
@@ -515,12 +566,12 @@ body {
 }
 
 .switcher-btn:hover {
-    color: #ffffff;
+    color: var(--on-surface);
 }
 
 .switcher-btn.active {
-    background: #ffffff;
-    color: #121212;
+    background: var(--primary);
+    color: #ffffff;
 }
 
 /* Agenda / List Layout styles */
@@ -540,35 +591,35 @@ body {
     background: rgba(255, 255, 255, 0.01);
 }
 .agenda-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--outline);
     border-radius: 3px;
 }
 .agenda-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--on-surface-variant);
 }
 
 .agenda-item {
-    background: rgba(255, 255, 255, 0.01);
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--outline);
     border-radius: 12px;
     padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
     gap: 1.25rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
     user-select: none;
     -webkit-user-select: none;
 }
 
 .agenda-item:hover {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: var(--surface-variant);
+    border-color: var(--on-surface-variant);
 }
 
 .agenda-item.selected {
     background: rgba(136, 89, 255, 0.08);
-    border-color: #8859ff;
+    border-color: var(--brand-green);
 }
 
 .agenda-date-info {
@@ -576,7 +627,7 @@ body {
     flex-direction: column;
     align-items: center;
     min-width: 60px;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid var(--outline);
     padding-right: 1rem;
 }
 
@@ -584,14 +635,14 @@ body {
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
-    color: #bfaaff;
+    color: var(--brand-green);
     letter-spacing: 0.05em;
 }
 
 .agenda-day {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--on-surface);
     margin-top: 2px;
 }
 
@@ -605,7 +656,7 @@ body {
 .agenda-time {
     font-size: 0.9rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--on-surface);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -614,24 +665,24 @@ body {
 .agenda-duration {
     font-size: 0.7rem;
     font-weight: 450;
-    color: #bfaaff;
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--on-surface-variant);
+    background: var(--surface-variant);
     padding: 1px 6px;
     border-radius: 10px;
 }
 
 .agenda-notes {
     font-size: 0.8rem;
-    color: #dfdbe5;
+    color: var(--on-surface-variant);
     font-weight: 400;
 }
 
 .agenda-empty {
     text-align: center;
     padding: 2.5rem 1rem;
-    color: #bfaaff;
+    color: var(--on-surface-variant);
     font-size: 0.9rem;
-    border: 1px dashed rgba(255, 255, 255, 0.08);
+    border: 1px dashed var(--outline);
     border-radius: 12px;
 }
 
@@ -725,7 +776,7 @@ body {
         display: block;
         width: 6px;
         height: 6px;
-        background-color: #8859ff;
+        background-color: var(--brand-green);
         border-radius: 50%;
         margin-top: 2px;
         flex-shrink: 0;
