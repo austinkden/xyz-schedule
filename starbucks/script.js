@@ -266,7 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
             durEl.textContent = calculateDuration(shift.start, shift.end);
             tEl.appendChild(durEl);
             const nEl = document.createElement("div"); nEl.className = "agenda-notes";
-            nEl.textContent = shift.notes || "Shift scheduled";
+            nEl.textContent = shift.notes || "Shift";
             si.appendChild(tEl); si.appendChild(nEl);
             item.appendChild(si);
 
