@@ -1,487 +1,388 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
-    const prevMonthBtn = document.getElementById('prev-month');
-    const nextMonthBtn = document.getElementById('next-month');
-    const currentMonthYearHeader = document.getElementById('current-month-year');
-    
-    // View Switcher Elements
-    const btnViewMonth = document.getElementById('btn-view-month');
-    const btnViewAgenda = document.getElementById('btn-view-agenda');
-    const monthViewContainer = document.getElementById('month-view-container');
-    const agendaViewContainer = document.getElementById('agenda-view-container');
-    
-    // Settings Tray Elements
-    const settingsToggle = document.getElementById('settings-toggle');
-    const settingsTray = document.getElementById('settings-tray');
-    const btnFormat12h = document.getElementById('btn-format-12h');
-    const btnFormat24h = document.getElementById('btn-format-24h');
-    
-    // Calendar Grid & List Elements
-    const calendarDaysGrid = document.getElementById('calendar-days');
-    const agendaListContainer = document.getElementById('agenda-list');
-    
-    // Details Panel Elements
-    const detailsPlaceholder = document.getElementById('details-placeholder');
-    const detailsContent = document.getElementById('details-content');
-    const detailsDate = document.getElementById('details-date');
-    const detailsTime = document.getElementById('details-time');
-    const detailsDuration = document.getElementById('details-duration');
-    const detailsNotes = document.getElementById('details-notes');
-    const detailsNotesRow = document.getElementById('details-notes-row');
+document.addEventListener("DOMContentLoaded", () => {
+    const prevMonthBtn = document.getElementById("prev-month");
+    const nextMonthBtn = document.getElementById("next-month");
+    const currentMonthYearHeader = document.getElementById("current-month-year");
+    const btnViewMonth = document.getElementById("btn-view-month");
+    const btnViewAgenda = document.getElementById("btn-view-agenda");
+    const monthViewContainer = document.getElementById("month-view-container");
+    const agendaViewContainer = document.getElementById("agenda-view-container");
+    const settingsToggle = document.getElementById("settings-toggle");
+    const settingsTray = document.getElementById("settings-tray");
+    const btnFormat12h = document.getElementById("btn-format-12h");
+    const btnFormat24h = document.getElementById("btn-format-24h");
+    const btnWeekSun = document.getElementById("btn-week-sun");
+    const btnWeekMon = document.getElementById("btn-week-mon");
+    const btnAdjacentOn = document.getElementById("btn-adjacent-on");
+    const btnAdjacentOff = document.getElementById("btn-adjacent-off");
 
-    // Calendar State
+    const calendarDaysGrid = document.getElementById("calendar-days");
+    const agendaListContainer = document.getElementById("agenda-list");
+    const weekdaysHeader = document.getElementById("weekdays-header");
+    const monthSummaryEl = document.getElementById("month-summary");
+    const calendarCard = document.querySelector(".calendar-card");
+    const detailsPlaceholder = document.getElementById("details-placeholder");
+    const detailsContent = document.getElementById("details-content");
+    const detailsDate = document.getElementById("details-date");
+    const detailsCountdown = document.getElementById("details-countdown");
+    const detailsTime = document.getElementById("details-time");
+    const detailsDuration = document.getElementById("details-duration");
+    const detailsNotes = document.getElementById("details-notes");
+    const detailsNotesRow = document.getElementById("details-notes-row");
+
     let currentDate = new Date();
     let selectedDateStr = null;
-    let currentView = 'month'; // 'month' or 'agenda'
-    
-    // Load Time Format Preference from localStorage (defaults to 12h)
-    let timeFormat = localStorage.getItem('time-format-pref') || '12h';
+    let currentView = "month";
+    let timeFormat = localStorage.getItem("time-format-pref") || "12h";
+    let weekStart = localStorage.getItem("week-start-pref") || "sun";
+    let showAdjacentDays = localStorage.getItem("show-adjacent-pref") !== "false";
 
-    // Month Names
-    const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ];
 
-    // Helper: Zero-pad single digits
-    function pad(n) {
-        return String(n).padStart(2, '0');
+    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const labelsSun = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const labelsMon = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+    function pad(n) { return String(n).padStart(2, "0"); }
+    function formatDateKey(y, m, d) { return `${y}-${pad(m+1)}-${pad(d)}`; }
+
+    function parseTimeToMinutes(t) {
+        if (!t) return 0;
+        const p = t.trim().split(/\s+/);
+        if (p.length < 2) return 0;
+        const sp = p[0].split(":");
+        let h = parseInt(sp[0], 10);
+        const m = parseInt(sp[1] || "0", 10);
+        const ap = p[1].toUpperCase();
+        if (ap === "PM" && h < 12) h += 12;
+        else if (ap === "AM" && h === 12) h = 0;
+        return h * 60 + m;
     }
 
-    // Helper: Format date as YYYY-MM-DD
-    function formatDateKey(year, month, day) {
-        return `${year}-${pad(month + 1)}-${pad(day)}`;
-    }
-
-    // Helper: Parse AM/PM time to minutes from midnight
-    function parseTimeToMinutes(timeStr) {
-        if (!timeStr) return 0;
-        const parts = timeStr.trim().split(/\s+/);
-        if (parts.length < 2) return 0;
-        
-        const timePart = parts[0];
-        const ampmPart = parts[1].toUpperCase();
-        
-        const timeSplit = timePart.split(':');
-        let hours = parseInt(timeSplit[0], 10);
-        const minutes = parseInt(timeSplit[1] || '0', 10);
-        
-        if (ampmPart === 'PM' && hours < 12) {
-            hours += 12;
-        } else if (ampmPart === 'AM' && hours === 12) {
-            hours = 0;
-        }
-        
-        return hours * 60 + minutes;
-    }
-
-    // Helper: Calculate shift duration and format as text (e.g. "4h 15m")
-    function calculateDuration(start, end) {
-        const startMins = parseTimeToMinutes(start);
-        const endMins = parseTimeToMinutes(end);
-        let diffMins = endMins - startMins;
-        
-        if (diffMins < 0) {
-            diffMins += 24 * 60; // Handle overnight shifts
-        }
-        
-        const hours = Math.floor(diffMins / 60);
-        const minutes = diffMins % 60;
-        
+    function calculateDuration(s, e) {
+        let d = parseTimeToMinutes(e) - parseTimeToMinutes(s);
+        if (d < 0) d += 1440;
+        const h = Math.floor(d / 60), m = d % 60;
         const parts = [];
-        if (hours > 0) {
-            parts.push(`${hours}h`);
-        }
-        if (minutes > 0) {
-            parts.push(`${minutes}m`);
-        }
-        
-        return parts.length > 0 ? parts.join(' ') : '0m';
+        if (h > 0) parts.push(`${h}h`);
+        if (m > 0) parts.push(`${m}m`);
+        return parts.length ? parts.join(" ") : "0m";
     }
 
-    // Helper: Format date for detailed view
     function formatLongDate(dateStr) {
-        const parts = dateStr.split('-');
-        const dateObj = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
-        
-        const options = { 
-            weekday: 'long', 
-            month: 'long', 
-            day: 'numeric', 
-            year: 'numeric',
-            timeZone: 'UTC'
-        };
-        return dateObj.toLocaleDateString('en-US', options);
+        const p = dateStr.split("-");
+        return new Date(Date.UTC(p[0], p[1]-1, p[2])).toLocaleDateString("en-US", {weekday:"long",month:"long",day:"numeric",year:"numeric",timeZone:"UTC"});
     }
 
-    // Helper: Format time based on 12h/24h setting
-    function formatTime(timeStr, is24h) {
-        if (!timeStr) return "";
-        const parts = timeStr.trim().split(/\s+/);
-        if (parts.length < 2) return timeStr;
-        
+    function formatTime(t, is24h) {
+        if (!t) return "";
+        const p = t.trim().split(/\s+/);
+        if (p.length < 2) return t;
         if (is24h) {
-            const timeSplit = parts[0].split(':');
-            let hours = parseInt(timeSplit[0], 10);
-            const minutes = timeSplit[1] || '00';
-            const ampm = parts[1].toUpperCase();
-            
-            if (ampm === 'PM' && hours < 12) hours += 12;
-            if (ampm === 'AM' && hours === 12) hours = 0;
-            return `${pad(hours)}:${minutes}`;
+            const sp = p[0].split(":");
+            let h = parseInt(sp[0], 10);
+            const m = sp[1] || "00";
+            const ap = p[1].toUpperCase();
+            if (ap === "PM" && h < 12) h += 12;
+            if (ap === "AM" && h === 12) h = 0;
+            return `${pad(h)}:${m}`;
         }
-        return timeStr.trim();
+        return t.trim();
     }
 
-    // Helper: Format short time for calendar cells
-    function formatShortTime(timeStr, is24h) {
-        if (!timeStr) return "";
-        const parts = timeStr.trim().split(/\s+/);
-        if (parts.length < 2) return timeStr;
-        
-        const timeSplit = parts[0].split(':');
-        let h = parseInt(timeSplit[0], 10);
-        const m = parseInt(timeSplit[1] || '0', 10);
-        const ampm = parts[1].toUpperCase();
-
+    function formatShortTime(t, is24h) {
+        if (!t) return "";
+        const p = t.trim().split(/\s+/);
+        if (p.length < 2) return t;
+        const sp = p[0].split(":");
+        let h = parseInt(sp[0], 10);
+        const m = parseInt(sp[1] || "0", 10);
+        const ap = p[1].toUpperCase();
         if (is24h) {
             let h24 = h;
-            if (ampm === 'PM' && h < 12) h24 += 12;
-            if (ampm === 'AM' && h === 12) h24 = 0;
+            if (ap === "PM" && h < 12) h24 += 12;
+            if (ap === "AM" && h === 12) h24 = 0;
             return `${pad(h24)}:${pad(m)}`;
+        }
+        return `${m > 0 ? h+":"+pad(m) : h}${ap === "PM" ? "p" : "a"}`;
+    }
+
+    function getShiftCountdown(dateStr) {
+        const p = dateStr.split("-");
+        const shift = new Date(Date.UTC(+p[0], +p[1]-1, +p[2]));
+        const now = new Date();
+        const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+        const diff = Math.round((shift - today) / 86400000);
+        if (diff === 0)  return { text: "Today",     type: "today"  };
+        if (diff === 1)  return { text: "Tomorrow",  type: "soon"   };
+        if (diff > 1)    return { text: `in ${diff} days`, type: "future" };
+        if (diff === -1) return { text: "Yesterday", type: "past"   };
+        return { text: `${Math.abs(diff)} days ago`, type: "past" };
+    }
+
+    function renderWeekdayHeader() {
+        if (!weekdaysHeader) return;
+        const labels = weekStart === "mon" ? labelsMon : labelsSun;
+        weekdaysHeader.innerHTML = labels.map(d => `<div>${d}</div>`).join("");
+    }
+
+    function renderMonthSummary() {
+        if (!monthSummaryEl) return;
+        const y = currentDate.getFullYear(), mo = currentDate.getMonth();
+        const total = new Date(y, mo+1, 0).getDate();
+        const sched = window.STARBUCKS_SCHEDULE || {};
+        let count = 0, mins = 0;
+        for (let d = 1; d <= total; d++) {
+            const shift = sched[formatDateKey(y, mo, d)];
+            if (shift) {
+                count++;
+                let diff = parseTimeToMinutes(shift.end) - parseTimeToMinutes(shift.start);
+                if (diff < 0) diff += 1440;
+                mins += diff;
+            }
+        }
+        if (count === 0) {
+            monthSummaryEl.textContent = "No shifts this month";
         } else {
-            const timeText = m > 0 ? `${h}:${pad(m)}` : `${h}`;
-            const modifier = ampm === 'PM' ? 'p' : 'a';
-            return `${timeText}${modifier}`;
+            const h = Math.floor(mins/60), m = mins%60;
+            monthSummaryEl.textContent = `${count} shift${count !== 1 ? "s" : ""} \u00b7 ${m > 0 ? h+"h "+m+"m" : h+"h"} total`;
         }
     }
 
-    // Display shift details
     function showShiftDetails(dateStr) {
         selectedDateStr = dateStr;
-        
-        // Highlight cell in monthly grid
-        document.querySelectorAll('.day-cell').forEach(cell => {
-            if (cell.dataset.date === dateStr) {
-                cell.classList.add('selected');
-            } else {
-                cell.classList.remove('selected');
-            }
-        });
+        document.querySelectorAll(".day-cell").forEach(c => c.classList.toggle("selected", c.dataset.date === dateStr));
+        document.querySelectorAll(".agenda-item").forEach(r => r.classList.toggle("selected", r.dataset.date === dateStr));
 
-        // Highlight row in agenda view
-        document.querySelectorAll('.agenda-item').forEach(row => {
-            if (row.dataset.date === dateStr) {
-                row.classList.add('selected');
-            } else {
-                row.classList.remove('selected');
-            }
-        });
-
-        const schedule = window.STARBUCKS_SCHEDULE || {};
-        const shift = schedule[dateStr];
-
-        const is24h = (timeFormat === '24h');
+        const shift = (window.STARBUCKS_SCHEDULE || {})[dateStr];
+        const is24h = timeFormat === "24h";
 
         if (shift) {
-            detailsPlaceholder.classList.add('hidden');
-            detailsContent.classList.remove('hidden');
+            detailsPlaceholder.classList.add("hidden");
+            detailsContent.classList.remove("hidden");
             detailsDate.textContent = formatLongDate(dateStr);
-            detailsTime.textContent = `${formatTime(shift.start, is24h)} - ${formatTime(shift.end, is24h)}`;
-            
-            const durationText = calculateDuration(shift.start, shift.end);
-            detailsDuration.textContent = `(${durationText})`;
-            
-            if (shift.notes) {
-                detailsNotes.textContent = shift.notes;
-                detailsNotesRow.style.display = 'flex';
-            } else {
-                detailsNotesRow.style.display = 'none';
+            detailsTime.textContent = `${formatTime(shift.start, is24h)} \u2013 ${formatTime(shift.end, is24h)}`;
+            detailsDuration.textContent = `(${calculateDuration(shift.start, shift.end)})`;
+            if (detailsCountdown) {
+                const c = getShiftCountdown(dateStr);
+                detailsCountdown.textContent = c.text;
+                detailsCountdown.className = `countdown-badge countdown-${c.type}`;
             }
+            if (shift.notes) { detailsNotes.textContent = shift.notes; detailsNotesRow.style.display = "flex"; }
+            else { detailsNotesRow.style.display = "none"; }
         } else {
-            detailsPlaceholder.classList.remove('hidden');
-            detailsContent.classList.add('hidden');
+            detailsPlaceholder.classList.remove("hidden");
+            detailsContent.classList.add("hidden");
+            if (detailsCountdown) { detailsCountdown.textContent = ""; detailsCountdown.className = "countdown-badge"; }
         }
     }
 
-    // Render monthly grid
-    function renderMonthGrid() {
-        calendarDaysGrid.innerHTML = '';
-        
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        
-        const firstDayIndex = new Date(year, month, 1).getDay();
-        const totalDays = new Date(year, month + 1, 0).getDate();
-        const prevTotalDays = new Date(year, month, 0).getDate();
-        
-        const today = new Date();
-        const todayStr = formatDateKey(today.getFullYear(), today.getMonth(), today.getDate());
-        const is24h = (timeFormat === '24h');
-
-        // 1. Previous month trailing padding
-        for (let i = firstDayIndex; i > 0; i--) {
-            const dayNum = prevTotalDays - i + 1;
-            const prevMonthVal = month === 0 ? 11 : month - 1;
-            const prevYearVal = month === 0 ? year - 1 : year;
-            const dateStr = formatDateKey(prevYearVal, prevMonthVal, dayNum);
-            
-            const cell = createDayCell(dayNum, dateStr, true, false, is24h);
-            calendarDaysGrid.appendChild(cell);
-        }
-        
-        // 2. Current month days
-        for (let dayNum = 1; dayNum <= totalDays; dayNum++) {
-            const dateStr = formatDateKey(year, month, dayNum);
-            const isToday = (dateStr === todayStr);
-            
-            const cell = createDayCell(dayNum, dateStr, false, isToday, is24h);
-            calendarDaysGrid.appendChild(cell);
-        }
-        
-        // 3. Next month leading padding
-        const totalCells = firstDayIndex + totalDays;
-        const nextMonthPadding = (7 - (totalCells % 7)) % 7;
-        
-        for (let i = 1; i <= nextMonthPadding; i++) {
-            const nextMonthVal = month === 11 ? 0 : month + 1;
-            const nextYearVal = month === 11 ? year + 1 : year;
-            const dateStr = formatDateKey(nextYearVal, nextMonthVal, i);
-            
-            const cell = createDayCell(i, dateStr, true, false, is24h);
-            calendarDaysGrid.appendChild(cell);
-        }
-
-        if (selectedDateStr) {
-            const visibleCell = calendarDaysGrid.querySelector(`.day-cell[data-date="${selectedDateStr}"]`);
-            if (visibleCell) {
-                visibleCell.classList.add('selected');
-            }
-        }
-    }
-
-    // Helper: Create day cell element
-    function createDayCell(dayNum, dateStr, isAdjacent, isToday, is24h) {
-        const cell = document.createElement('div');
-        cell.className = 'day-cell';
+    function createDayCell(dayNum, dateStr, isAdj, isToday, is24h) {
+        const cell = document.createElement("div");
+        cell.className = "day-cell";
         cell.dataset.date = dateStr;
-        
-        if (isAdjacent) cell.classList.add('adjacent-month');
-        if (isToday) cell.classList.add('today');
-        
-        const schedule = window.STARBUCKS_SCHEDULE || {};
-        const shift = schedule[dateStr];
-        
-        if (shift) cell.classList.add('has-shift');
-
-        const numberLabel = document.createElement('span');
-        numberLabel.className = 'day-number';
-        numberLabel.textContent = dayNum;
-        cell.appendChild(numberLabel);
-        
+        if (isAdj)   cell.classList.add("adjacent-month");
+        if (isToday) cell.classList.add("today");
+        const shift = (window.STARBUCKS_SCHEDULE || {})[dateStr];
+        if (shift) cell.classList.add("has-shift");
+        const num = document.createElement("span");
+        num.className = "day-number";
+        num.textContent = dayNum;
+        cell.appendChild(num);
         if (shift) {
-            const shiftTag = document.createElement('span');
-            shiftTag.className = 'shift-tag';
-            shiftTag.textContent = `${formatShortTime(shift.start, is24h)}-${formatShortTime(shift.end, is24h)}`;
-            cell.appendChild(shiftTag);
+            const tag = document.createElement("span");
+            tag.className = "shift-tag";
+            tag.textContent = `${formatShortTime(shift.start, is24h)}-${formatShortTime(shift.end, is24h)}`;
+            cell.appendChild(tag);
         }
-        
-        cell.addEventListener('click', () => {
-            showShiftDetails(dateStr);
-        });
-        
+        cell.addEventListener("click", () => showShiftDetails(dateStr));
         return cell;
     }
 
-    // Render Agenda / List view
-    function renderAgendaList() {
-        agendaListContainer.innerHTML = '';
-        
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const totalDays = new Date(year, month + 1, 0).getDate();
-        const schedule = window.STARBUCKS_SCHEDULE || {};
-        const is24h = (timeFormat === '24h');
-        
-        let shiftsCount = 0;
-        
-        for (let d = 1; d <= totalDays; d++) {
-            const dateStr = formatDateKey(year, month, d);
-            const shift = schedule[dateStr];
-            
-            if (shift) {
-                shiftsCount++;
-                
-                const item = document.createElement('div');
-                item.className = 'agenda-item';
-                item.dataset.date = dateStr;
-                if (selectedDateStr === dateStr) {
-                    item.classList.add('selected');
-                }
-                
-                // Date tag construction
-                const dateParts = dateStr.split('-');
-                const tempDateObj = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
-                const weekdayShort = tempDateObj.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
-                const monthDay = tempDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-                
-                const dateInfo = document.createElement('div');
-                dateInfo.className = 'agenda-date-info';
-                
-                const weekdayEl = document.createElement('span');
-                weekdayEl.className = 'agenda-weekday';
-                weekdayEl.textContent = weekdayShort;
-                
-                const dayEl = document.createElement('span');
-                dayEl.className = 'agenda-day';
-                dayEl.textContent = monthDay;
-                
-                dateInfo.appendChild(weekdayEl);
-                dateInfo.appendChild(dayEl);
-                item.appendChild(dateInfo);
-                
-                // Shift details
-                const shiftInfo = document.createElement('div');
-                shiftInfo.className = 'agenda-shift-info';
-                
-                const timeEl = document.createElement('div');
-                timeEl.className = 'agenda-time';
-                timeEl.textContent = `${formatTime(shift.start, is24h)} - ${formatTime(shift.end, is24h)}`;
-                
-                const durationEl = document.createElement('span');
-                durationEl.className = 'agenda-duration';
-                const durationText = calculateDuration(shift.start, shift.end);
-                durationEl.textContent = durationText;
-                timeEl.appendChild(durationEl);
-                
-                const notesEl = document.createElement('div');
-                notesEl.className = 'agenda-notes';
-                notesEl.textContent = shift.notes || "Shift scheduled";
-                
-                shiftInfo.appendChild(timeEl);
-                shiftInfo.appendChild(notesEl);
-                item.appendChild(shiftInfo);
-                
-                item.addEventListener('click', () => {
-                    showShiftDetails(dateStr);
-                });
-                
-                agendaListContainer.appendChild(item);
-            }
+    function renderMonthGrid() {
+        calendarDaysGrid.innerHTML = "";
+        const y = currentDate.getFullYear(), mo = currentDate.getMonth();
+        const is24h = timeFormat === "24h";
+        const offset = weekStart === "mon" ? 1 : 0;
+        const firstDayIdx = (new Date(y, mo, 1).getDay() - offset + 7) % 7;
+        const totalDays = new Date(y, mo+1, 0).getDate();
+        const prevTotal = new Date(y, mo, 0).getDate();
+        const now = new Date();
+        const todayStr = formatDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+
+        for (let i = firstDayIdx; i > 0; i--) {
+            const dn = prevTotal - i + 1;
+            const pm = mo === 0 ? 11 : mo-1, py = mo === 0 ? y-1 : y;
+            if (showAdjacentDays) calendarDaysGrid.appendChild(createDayCell(dn, formatDateKey(py, pm, dn), true, false, is24h));
+            else { const s = document.createElement("div"); s.className = "day-cell-spacer"; calendarDaysGrid.appendChild(s); }
         }
-        
-        if (shiftsCount === 0) {
-            const emptyState = document.createElement('div');
-            emptyState.className = 'agenda-empty';
-            emptyState.textContent = 'No shifts scheduled for this month.';
-            agendaListContainer.appendChild(emptyState);
+        for (let d = 1; d <= totalDays; d++) {
+            const ds = formatDateKey(y, mo, d);
+            calendarDaysGrid.appendChild(createDayCell(d, ds, false, ds === todayStr, is24h));
+        }
+        const nextPad = (7 - ((firstDayIdx + totalDays) % 7)) % 7;
+        for (let i = 1; i <= nextPad; i++) {
+            const nm = mo === 11 ? 0 : mo+1, ny = mo === 11 ? y+1 : y;
+            if (showAdjacentDays) calendarDaysGrid.appendChild(createDayCell(i, formatDateKey(ny, nm, i), true, false, is24h));
+            else { const s = document.createElement("div"); s.className = "day-cell-spacer"; calendarDaysGrid.appendChild(s); }
+        }
+        if (selectedDateStr) {
+            const cell = calendarDaysGrid.querySelector(`.day-cell[data-date="${selectedDateStr}"]`);
+            if (cell) cell.classList.add("selected");
         }
     }
 
-    // Master Render function
+    function renderAgendaList() {
+        agendaListContainer.innerHTML = "";
+        const y = currentDate.getFullYear(), mo = currentDate.getMonth();
+        const totalDays = new Date(y, mo+1, 0).getDate();
+        const sched = window.STARBUCKS_SCHEDULE || {};
+        const is24h = timeFormat === "24h";
+        let count = 0;
+
+        for (let d = 1; d <= totalDays; d++) {
+            const dateStr = formatDateKey(y, mo, d);
+            const shift = sched[dateStr];
+            if (!shift) continue;
+            count++;
+            const item = document.createElement("div");
+            item.className = "agenda-item";
+            item.dataset.date = dateStr;
+            if (selectedDateStr === dateStr) item.classList.add("selected");
+
+            const p = dateStr.split("-");
+            const dObj = new Date(Date.UTC(p[0], p[1]-1, p[2]));
+            const dateInfo = document.createElement("div");
+            dateInfo.className = "agenda-date-info";
+            const wdEl = document.createElement("span"); wdEl.className = "agenda-weekday";
+            wdEl.textContent = dObj.toLocaleDateString("en-US", {weekday:"short",timeZone:"UTC"});
+            const dayEl = document.createElement("span"); dayEl.className = "agenda-day";
+            dayEl.textContent = dObj.toLocaleDateString("en-US", {month:"short",day:"numeric",timeZone:"UTC"});
+            dateInfo.appendChild(wdEl); dateInfo.appendChild(dayEl);
+            item.appendChild(dateInfo);
+
+            const si = document.createElement("div"); si.className = "agenda-shift-info";
+            const tEl = document.createElement("div"); tEl.className = "agenda-time";
+            tEl.textContent = `${formatTime(shift.start, is24h)} \u2013 ${formatTime(shift.end, is24h)}`;
+            const durEl = document.createElement("span"); durEl.className = "agenda-duration";
+            durEl.textContent = calculateDuration(shift.start, shift.end);
+            tEl.appendChild(durEl);
+            const nEl = document.createElement("div"); nEl.className = "agenda-notes";
+            nEl.textContent = shift.notes || "Shift scheduled";
+            si.appendChild(tEl); si.appendChild(nEl);
+            item.appendChild(si);
+
+            const c = getShiftCountdown(dateStr);
+            const cEl = document.createElement("span");
+            cEl.className = `countdown-badge countdown-${c.type}`;
+            cEl.textContent = c.text;
+            item.appendChild(cEl);
+
+            item.addEventListener("click", () => showShiftDetails(dateStr));
+            agendaListContainer.appendChild(item);
+        }
+
+        if (count === 0) {
+            const empty = document.createElement("div");
+            empty.className = "agenda-empty";
+            empty.textContent = "No shifts scheduled for this month.";
+            agendaListContainer.appendChild(empty);
+        }
+    }
+
     function renderAll() {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        
-        currentMonthYearHeader.textContent = `${monthNames[month]} ${year}`;
-        
-        if (currentView === 'month') {
-            monthViewContainer.classList.remove('hidden');
-            agendaViewContainer.classList.add('hidden');
+        currentMonthYearHeader.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        renderWeekdayHeader();
+        renderMonthSummary();
+        if (currentView === "month") {
+            monthViewContainer.classList.remove("hidden");
+            agendaViewContainer.classList.add("hidden");
             renderMonthGrid();
         } else {
-            monthViewContainer.classList.add('hidden');
-            agendaViewContainer.classList.remove('hidden');
+            monthViewContainer.classList.add("hidden");
+            agendaViewContainer.classList.remove("hidden");
             renderAgendaList();
         }
-
-        if (selectedDateStr) {
-            showShiftDetails(selectedDateStr);
-        }
+        if (selectedDateStr) showShiftDetails(selectedDateStr);
     }
 
-    // Set Time Format Preference and update UI
-    function setTimeFormat(format) {
-        timeFormat = format;
-        localStorage.setItem('time-format-pref', format);
-        
-        if (format === '12h') {
-            btnFormat12h.classList.add('active');
-            btnFormat24h.classList.remove('active');
-        } else {
-            btnFormat12h.classList.remove('active');
-            btnFormat24h.classList.add('active');
-        }
-        
+    function setTimeFormat(f) {
+        timeFormat = f; localStorage.setItem("time-format-pref", f);
+        btnFormat12h.classList.toggle("active", f === "12h");
+        btnFormat24h.classList.toggle("active", f === "24h");
+        renderAll();
+    }
+    function setWeekStart(v) {
+        weekStart = v; localStorage.setItem("week-start-pref", v);
+        btnWeekSun.classList.toggle("active", v === "sun");
+        btnWeekMon.classList.toggle("active", v === "mon");
+        renderAll();
+    }
+    function setAdjacentDays(v) {
+        showAdjacentDays = v; localStorage.setItem("show-adjacent-pref", String(v));
+        btnAdjacentOn.classList.toggle("active", v);
+        btnAdjacentOff.classList.toggle("active", !v);
         renderAll();
     }
 
-    // Set Active View (Month / Agenda)
     function setView(view) {
         currentView = view;
-        
-        if (view === 'month') {
-            btnViewMonth.classList.add('active');
-            btnViewAgenda.classList.remove('active');
-        } else {
-            btnViewMonth.classList.remove('active');
-            btnViewAgenda.classList.add('active');
-        }
-        
+        btnViewMonth.classList.toggle("active", view === "month");
+        btnViewAgenda.classList.toggle("active", view === "agenda");
         renderAll();
     }
 
-    // Navigation Listeners
-    prevMonthBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
+    prevMonthBtn.addEventListener("click", () => { currentDate.setMonth(currentDate.getMonth()-1); renderAll(); });
+    nextMonthBtn.addEventListener("click", () => { currentDate.setMonth(currentDate.getMonth()+1); renderAll(); });
+    currentMonthYearHeader.addEventListener("click", () => {
+        const now = new Date();
+        currentDate = new Date(now.getFullYear(), now.getMonth(), 1);
         renderAll();
+        showShiftDetails(formatDateKey(now.getFullYear(), now.getMonth(), now.getDate()));
     });
-
-    nextMonthBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderAll();
+    document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+        if (e.key === "ArrowLeft")  { e.preventDefault(); currentDate.setMonth(currentDate.getMonth()-1); renderAll(); }
+        else if (e.key === "ArrowRight") { e.preventDefault(); currentDate.setMonth(currentDate.getMonth()+1); renderAll(); }
+        else if (e.key === "t" || e.key === "T") {
+            const now = new Date();
+            currentDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            renderAll();
+            showShiftDetails(formatDateKey(now.getFullYear(), now.getMonth(), now.getDate()));
+        }
     });
-
-    // View Switcher Listeners
-    btnViewMonth.addEventListener('click', () => setView('month'));
-    btnViewAgenda.addEventListener('click', () => setView('agenda'));
-
-    // Settings Panel Listeners
-    settingsToggle.addEventListener('click', () => {
-        settingsTray.classList.toggle('hidden');
-        settingsToggle.classList.toggle('active');
+    btnViewMonth.addEventListener("click", () => setView("month"));
+    btnViewAgenda.addEventListener("click", () => setView("agenda"));
+    settingsToggle.addEventListener("click", () => {
+        settingsTray.classList.toggle("hidden");
+        settingsToggle.classList.toggle("active");
     });
+    btnFormat12h.addEventListener("click", () => setTimeFormat("12h"));
+    btnFormat24h.addEventListener("click", () => setTimeFormat("24h"));
+    btnWeekSun.addEventListener("click", () => setWeekStart("sun"));
+    btnWeekMon.addEventListener("click", () => setWeekStart("mon"));
+    btnAdjacentOn.addEventListener("click", () => setAdjacentDays(true));
+    btnAdjacentOff.addEventListener("click", () => setAdjacentDays(false));
 
-    btnFormat12h.addEventListener('click', () => setTimeFormat('12h'));
-    btnFormat24h.addEventListener('click', () => setTimeFormat('24h'));
 
-    // Initialize formatting toggle buttons on load
-    setTimeFormat(timeFormat);
+    // Init UI state from localStorage (single render)
+    btnFormat12h.classList.toggle("active", timeFormat === "12h");
+    btnFormat24h.classList.toggle("active", timeFormat === "24h");
+    btnWeekSun.classList.toggle("active", weekStart === "sun");
+    btnWeekMon.classList.toggle("active", weekStart === "mon");
+    btnAdjacentOn.classList.toggle("active", showAdjacentDays);
+    btnAdjacentOff.classList.toggle("active", !showAdjacentDays);
 
-    // Default select current day or the first shift in the current month
-    const today = new Date();
-    const todayStr = formatDateKey(today.getFullYear(), today.getMonth(), today.getDate());
-    const schedule = window.STARBUCKS_SCHEDULE || {};
-    
-    if (schedule[todayStr]) {
-        showShiftDetails(todayStr);
+    renderAll();
+
+    // Default selection
+    const now2 = new Date();
+    const todayStr2 = formatDateKey(now2.getFullYear(), now2.getMonth(), now2.getDate());
+    const sched2 = window.STARBUCKS_SCHEDULE || {};
+    if (sched2[todayStr2]) {
+        showShiftDetails(todayStr2);
     } else {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        let firstShiftDateStr = null;
-        
-        for (let d = 1; d <= 31; d++) {
-            const checkStr = formatDateKey(year, month, d);
-            if (schedule[checkStr]) {
-                firstShiftDateStr = checkStr;
-                break;
-            }
-        }
-        
-        if (firstShiftDateStr) {
-            showShiftDetails(firstShiftDateStr);
-        } else {
-            showShiftDetails(todayStr);
-        }
+        const y2 = currentDate.getFullYear(), mo2 = currentDate.getMonth();
+        let first = null;
+        for (let d = 1; d <= 31; d++) { const s = formatDateKey(y2, mo2, d); if (sched2[s]) { first = s; break; } }
+        showShiftDetails(first || todayStr2);
     }
 });
