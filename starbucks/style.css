@@ -45,6 +45,31 @@ img {
     background: var(--highlight-bg);
 }
 
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--outline);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Firefox Support */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--outline) transparent;
+}
+
 .back-link, 
 .logo, 
 .navigation-controls, 
@@ -86,9 +111,10 @@ body {
     color: var(--on-surface);
     font-family: 'Google Sans Flex', sans-serif;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
-    padding: 30px 15px;
+    padding: 70px 15px 30px;
     position: relative;
     overflow-x: hidden;
 }
@@ -104,7 +130,7 @@ body {
 }
 
 .back-link {
-    position: fixed;
+    position: absolute;
     top: 30px;
     left: 30px;
     z-index: 1000;
@@ -229,7 +255,7 @@ body {
 /* Weekdays labels */
 .weekdays-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     text-align: center;
     margin-bottom: 0.75rem;
 }
@@ -246,7 +272,7 @@ body {
 /* Calendar Grid */
 .days-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 0.4rem;
 }
 
@@ -648,7 +674,7 @@ body {
     border-radius: 3px;
 }
 .agenda-list::-webkit-scrollbar-thumb:hover {
-    background: var(--on-surface-variant);
+    background: var(--primary);
 }
 
 .agenda-item {
@@ -800,6 +826,10 @@ body {
 
 /* Mobile Responsiveness */
 @media (max-width: 600px) {
+    body {
+        padding-top: 60px;
+    }
+    
     .back-link {
         top: 20px;
         left: 20px;

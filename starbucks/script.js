@@ -44,16 +44,22 @@ document.addEventListener("DOMContentLoaded", () => {
     function pad(n) { return String(n).padStart(2, "0"); }
     function formatDateKey(y, m, d) { return `${y}-${pad(m+1)}-${pad(d)}`; }
 
-    function parseTimeToMinutes(t) {
-        if (!t) return 0;
+    function parseTimeString(t) {
+        if (!t) return { h: 0, m: 0 };
         const p = t.trim().split(/\s+/);
-        if (p.length < 2) return 0;
         const sp = p[0].split(":");
         let h = parseInt(sp[0], 10);
         const m = parseInt(sp[1] || "0", 10);
-        const ap = p[1].toUpperCase();
-        if (ap === "PM" && h < 12) h += 12;
-        else if (ap === "AM" && h === 12) h = 0;
+        if (p.length >= 2) {
+            const ap = p[1].toUpperCase();
+            if (ap === "PM" && h < 12) h += 12;
+            else if (ap === "AM" && h === 12) h = 0;
+        }
+        return { h, m };
+    }
+
+    function parseTimeToMinutes(t) {
+        const { h, m } = parseTimeString(t);
         return h * 60 + m;
     }
 
@@ -74,35 +80,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function formatTime(t, is24h) {
         if (!t) return "";
-        const p = t.trim().split(/\s+/);
-        if (p.length < 2) return t;
+        const { h, m } = parseTimeString(t);
         if (is24h) {
-            const sp = p[0].split(":");
-            let h = parseInt(sp[0], 10);
-            const m = sp[1] || "00";
-            const ap = p[1].toUpperCase();
-            if (ap === "PM" && h < 12) h += 12;
-            if (ap === "AM" && h === 12) h = 0;
-            return `${pad(h)}:${m}`;
+            return `${pad(h)}:${pad(m)}`;
         }
-        return t.trim();
+        const ap = h >= 12 ? "PM" : "AM";
+        let h12 = h % 12;
+        if (h12 === 0) h12 = 12;
+        return `${pad(h12)}:${pad(m)} ${ap}`;
     }
 
     function formatShortTime(t, is24h) {
         if (!t) return "";
-        const p = t.trim().split(/\s+/);
-        if (p.length < 2) return t;
-        const sp = p[0].split(":");
-        let h = parseInt(sp[0], 10);
-        const m = parseInt(sp[1] || "0", 10);
-        const ap = p[1].toUpperCase();
+        const { h, m } = parseTimeString(t);
         if (is24h) {
-            let h24 = h;
-            if (ap === "PM" && h < 12) h24 += 12;
-            if (ap === "AM" && h === 12) h24 = 0;
-            return `${pad(h24)}:${pad(m)}`;
+            return `${pad(h)}:${pad(m)}`;
         }
-        return `${m > 0 ? h+":"+pad(m) : h}${ap === "PM" ? "p" : "a"}`;
+        const ap = h >= 12 ? "p" : "a";
+        let h12 = h % 12;
+        if (h12 === 0) h12 = 12;
+        return `${h12}:${pad(m)}${ap}`;
     }
 
     function getShiftCountdown(dateStr) {
@@ -190,12 +187,47 @@ document.addEventListener("DOMContentLoaded", () => {
         if (shift) {
             const tag = document.createElement("span");
             tag.className = "shift-tag";
-            tag.textContent = `${formatShortTime(shift.start, is24h)}-${formatShortTime(shift.end, is24h)}`;
+            const fullText = `${formatShortTime(shift.start, is24h)}-${formatShortTime(shift.end, is24h)}`;
+            const startText = formatShortTime(shift.start, is24h);
+            tag.textContent = fullText;
+            tag.dataset.fullText = fullText;
+            tag.dataset.startText = startText;
             cell.appendChild(tag);
         }
         cell.addEventListener("click", () => showShiftDetails(dateStr));
         return cell;
     }
+
+    function adjustShiftTags() {
+        if (currentView !== "month") return;
+        const tags = document.querySelectorAll(".shift-tag");
+        tags.forEach(tag => {
+            tag.textContent = tag.dataset.fullText;
+            const containerWidth = tag.getBoundingClientRect().width;
+            
+            // Temporarily disable text-truncation style properties to measure true text size
+            tag.style.overflow = "visible";
+            tag.style.textOverflow = "clip";
+            tag.style.whiteSpace = "nowrap";
+            tag.style.width = "auto";
+            tag.style.display = "inline-block";
+            
+            const textWidth = tag.getBoundingClientRect().width;
+            
+            // Restore styles
+            tag.style.overflow = "";
+            tag.style.textOverflow = "";
+            tag.style.whiteSpace = "";
+            tag.style.width = "";
+            tag.style.display = "";
+            
+            if (textWidth > containerWidth + 0.1) {
+                tag.textContent = tag.dataset.startText;
+            }
+        });
+    }
+
+    window.addEventListener("resize", adjustShiftTags);
 
     function renderMonthGrid() {
         calendarDaysGrid.innerHTML = "";
@@ -296,6 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
             monthViewContainer.classList.remove("hidden");
             agendaViewContainer.classList.add("hidden");
             renderMonthGrid();
+            adjustShiftTags();
         } else {
             monthViewContainer.classList.add("hidden");
             agendaViewContainer.classList.remove("hidden");
