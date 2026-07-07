@@ -13,7 +13,7 @@
     --outline: #49454f;
     --highlight-color: #8859ff;
     --highlight-bg: #f2edff;
-    
+
     /* Starbucks accent colors using the unified purple theme */
     --brand-green: var(--primary);
     --brand-green-container: var(--primary-container);
@@ -70,35 +70,35 @@ img {
     scrollbar-color: var(--outline) transparent;
 }
 
-.back-link, 
-.logo, 
-.navigation-controls, 
-#current-month-year, 
-button, 
-.weekdays-grid, 
-.weekdays-grid div, 
-.day-cell, 
-.day-number, 
-.shift-tag, 
-.status-badge, 
-.detail-label, 
-.brand, 
-.brand h1, 
-.subtitle, 
-.settings-toggle, 
-.settings-tray, 
-.settings-label, 
-.toggle-group, 
-.toggle-option, 
-.view-switcher-container, 
-.view-switcher, 
-.switcher-btn, 
-.agenda-date-info, 
-.agenda-weekday, 
-.agenda-day, 
-#details-date, 
-.details-placeholder, 
-img, 
+.back-link,
+.logo,
+.navigation-controls,
+#current-month-year,
+button,
+.weekdays-grid,
+.weekdays-grid div,
+.day-cell,
+.day-number,
+.shift-tag,
+.status-badge,
+.detail-label,
+.brand,
+.brand h1,
+.subtitle,
+.settings-toggle,
+.settings-tray,
+.settings-label,
+.toggle-group,
+.toggle-option,
+.view-switcher-container,
+.view-switcher,
+.switcher-btn,
+.agenda-date-info,
+.agenda-weekday,
+.agenda-day,
+#details-date,
+.details-placeholder,
+img,
 svg {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -534,7 +534,7 @@ body {
     -webkit-user-select: none;
 }
 
-.settings-toggle:hover, 
+.settings-toggle:hover,
 .settings-toggle.active {
     color: var(--on-surface);
     background: rgba(255, 255, 255, 0.08);
@@ -558,8 +558,15 @@ body {
 }
 
 @keyframes slide-down {
-    0% { transform: translateY(-8px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
+    0% {
+        transform: translateY(-8px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .settings-group {
@@ -666,13 +673,16 @@ body {
 .agenda-list::-webkit-scrollbar {
     width: 6px;
 }
+
 .agenda-list::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.01);
 }
+
 .agenda-list::-webkit-scrollbar-thumb {
     background: var(--outline);
     border-radius: 3px;
 }
+
 .agenda-list::-webkit-scrollbar-thumb:hover {
     background: var(--primary);
 }
@@ -829,55 +839,55 @@ body {
     body {
         padding-top: 60px;
     }
-    
+
     .back-link {
         top: 20px;
         left: 20px;
     }
-    
+
     .calendar-container {
         gap: 1rem;
     }
-    
+
     .brand h1 {
         font-size: 1.5rem;
     }
-    
+
     .calendar-card {
         padding: 1rem 0.5rem;
         border-radius: 18px;
     }
-    
+
     .weekdays-grid div {
         font-size: 0.7rem;
     }
-    
+
     .day-cell {
         border-radius: 8px;
         padding: 0.35rem;
     }
-    
+
     .day-number {
         font-size: 0.85rem;
         width: 22px;
         height: 22px;
     }
-    
+
     .shift-tag {
         font-size: 0.5rem;
         padding: 1px 2px;
         letter-spacing: -0.02em;
     }
-    
+
     .details-card {
         padding: 1.25rem 1rem;
         border-radius: 18px;
     }
-    
+
     .details-header h3 {
         font-size: 1.1rem;
     }
-    
+
     .detail-row {
         font-size: 0.9rem;
     }
@@ -890,17 +900,17 @@ body {
         text-align: center;
         gap: 0.75rem;
     }
-    
+
     .brand {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .header-right-controls {
         width: 100%;
         justify-content: space-between;
     }
-    
+
     .settings-tray {
         border-radius: 12px;
         padding: 0.6rem 0.8rem;
@@ -911,35 +921,37 @@ body {
     .shift-tag {
         display: none !important;
     }
-    
+
     .day-cell {
         justify-content: center;
         align-items: center;
         aspect-ratio: 1;
         padding: 0.25rem;
     }
-    
+
     /* Shift dot removed per user request */
-    
+
     .day-number {
         margin: 0;
     }
-    
+
     .agenda-item {
         gap: 0.75rem;
         padding: 0.6rem 0.75rem;
     }
-    
+
     .agenda-date-info {
         min-width: 50px;
         padding-right: 0.75rem;
     }
-    
+
     .agenda-day {
         font-size: 0.75rem;
     }
-    
+
     .agenda-time {
         font-size: 0.8rem;
     }
+}
+}
 }

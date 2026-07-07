@@ -19,7 +19,12 @@ const STARBUCKS_SCHEDULE = {
     "2026-07-14": { start: "08:30", end: "12:30", notes: "" },
     "2026-07-15": { start: "13:00", end: "17:30", notes: "" },
     "2026-07-16": { start: "15:15", end: "19:15", notes: "" },
-    "2026-07-18": { start: "07:45", end: "12:30", notes: "" }
+    "2026-07-18": { start: "07:45", end: "12:30", notes: "" },
+    "2026-07-21": { start: "10:00", end: "17:00", notes: "" },
+    "2026-07-22": { start: "12:00", end: "16:00", notes: "" },
+    "2026-07-23": { start: "10:45", end: "15:00", notes: "" },
+    "2026-07-24": { start: "10:45", end: "14:45", notes: "" },
+    "2026-07-26": { start: "08:00", end: "12:45", notes: "" }
 };
 
 window.STARBUCKS_SCHEDULE = STARBUCKS_SCHEDULE;
