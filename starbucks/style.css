@@ -1,3 +1,4 @@
+@import "../style.css";
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,slnt,wdth,wght,GRAD,ROND@6..144,-10..0,25..151,1..1000,0..100,0..100&display=swap');
 
 :root {
@@ -148,52 +149,14 @@ body {
     color: var(--on-surface);
 }
 
-.calendar-header {
+.calendar-controls-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
-}
-
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.logo {
-    color: var(--brand-green);
-    background: #ffffff;
-    border-radius: 50%;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 2px solid var(--outline);
-}
-
-.logo img {
     width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 2px;
-}
-
-.brand h1 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    font-variation-settings: 'ROND' 100, 'wdth' 85;
-    letter-spacing: -0.01em;
-}
-
-.subtitle {
-    font-size: 0.85rem;
-    color: var(--brand-green);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
 }
 
 /* Material 3 Styled Pill Controls */
