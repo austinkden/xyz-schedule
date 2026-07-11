@@ -296,7 +296,10 @@ body {
     border: none !important;
     background: transparent !important;
     color: var(--primary) !important;
-    font-weight: 800;
+    font-weight: 850 !important;
+    font-size: 1.35em !important;
+    width: auto !important;
+    height: auto !important;
 }
 
 /* Today with shift */
