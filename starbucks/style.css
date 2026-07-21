@@ -800,10 +800,26 @@ body {
     color: var(--on-surface-variant);
 }
 
+:root.light-mode .countdown-future {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--on-surface);
+}
+
 .countdown-past {
     background: rgba(255, 255, 255, 0.04);
     color: var(--on-surface-variant);
     opacity: 0.5;
+}
+
+:root.light-mode .countdown-past {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--on-surface-variant);
+    opacity: 0.75;
+}
+
+:root.light-mode .status-badge.off-badge {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--on-surface);
 }
 
 /* Mobile Responsiveness */
