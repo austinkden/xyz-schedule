@@ -18,6 +18,12 @@
     /* Starbucks accent colors using the unified purple theme */
     --brand-green: var(--primary);
     --brand-green-container: var(--primary-container);
+
+    --cell-background: rgba(0, 0, 0, 0.15);
+}
+
+:root.light-mode {
+    --cell-background: rgba(0, 0, 0, 0.04);
 }
 
 * {
@@ -242,7 +248,7 @@ body {
 /* Individual Day Cell */
 .day-cell {
     aspect-ratio: 1.05;
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--cell-background);
     border: 1px solid var(--outline);
     border-radius: 12px;
     padding: 0.5rem;
@@ -335,7 +341,7 @@ body {
 .shift-tag {
     font-size: 0.65rem;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--on-primary-container, #ffffff);
     background: var(--brand-green-container);
     border-radius: 4px;
     padding: 2px 4px;
@@ -451,7 +457,7 @@ body {
 }
 
 .detail-val {
-    color: #ffffff;
+    color: var(--on-surface);
     font-weight: 600;
 }
 
@@ -654,7 +660,7 @@ body {
 }
 
 .agenda-item {
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--cell-background);
     border: 1px solid var(--outline);
     border-radius: 12px;
     padding: 0.75rem 1rem;
