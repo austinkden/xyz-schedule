@@ -409,13 +409,5 @@ document.addEventListener("DOMContentLoaded", () => {
     // Default selection
     const now2 = new Date();
     const todayStr2 = formatDateKey(now2.getFullYear(), now2.getMonth(), now2.getDate());
-    const sched2 = window.STARBUCKS_SCHEDULE || {};
-    if (sched2[todayStr2]) {
-        showShiftDetails(todayStr2);
-    } else {
-        const y2 = currentDate.getFullYear(), mo2 = currentDate.getMonth();
-        let first = null;
-        for (let d = 1; d <= 31; d++) { const s = formatDateKey(y2, mo2, d); if (sched2[s]) { first = s; break; } }
-        showShiftDetails(first || todayStr2);
-    }
+    showShiftDetails(todayStr2);
 });

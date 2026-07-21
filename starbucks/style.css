@@ -285,11 +285,11 @@ body {
 /* Today Highlighter - Re-formatted to highlight the container instead of a circle around the number */
 .day-cell.today {
     border: 2px solid var(--primary) !important;
-    background: rgba(136, 89, 255, 0.05) !important;
+    background: color-mix(in srgb, var(--primary) 5%, transparent) !important;
 }
 
 .day-cell.today:hover {
-    background: rgba(136, 89, 255, 0.12) !important;
+    background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
 }
 
 .day-cell.today .day-number {
@@ -304,32 +304,32 @@ body {
 
 /* Today with shift */
 .day-cell.today.has-shift {
-    background: rgba(136, 89, 255, 0.15) !important;
+    background: color-mix(in srgb, var(--primary) 15%, transparent) !important;
 }
 
 .day-cell.today.has-shift .day-number {
-    color: #ffffff !important;
+    color: var(--primary) !important;
 }
 
 /* Today selected */
 .day-cell.today.selected {
-    background: rgba(136, 89, 255, 0.2) !important;
+    background: color-mix(in srgb, var(--primary) 20%, transparent) !important;
 }
 
 /* Day with shift - Styled in signature purple */
 .day-cell.has-shift {
-    background: rgba(136, 89, 255, 0.08);
-    border-color: rgba(136, 89, 255, 0.35);
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 35%, transparent);
 }
 
 .day-cell.has-shift:hover {
-    background: rgba(136, 89, 255, 0.16);
-    border-color: rgba(136, 89, 255, 0.6);
+    background: color-mix(in srgb, var(--primary) 16%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 60%, transparent);
 }
 
 .day-cell.has-shift .day-number {
     background: var(--brand-green);
-    color: #ffffff;
+    color: var(--on-primary);
 }
 
 .shift-tag {
@@ -354,7 +354,7 @@ body {
 }
 
 .day-cell.selected.has-shift {
-    background: rgba(136, 89, 255, 0.22);
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
     border-color: var(--primary);
 }
 
@@ -411,12 +411,12 @@ body {
 .details-header h3 {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--on-surface);
 }
 
 .status-badge {
     background: var(--brand-green);
-    color: #ffffff;
+    color: var(--on-primary);
     font-size: 0.75rem;
     font-weight: 600;
     padding: 0.25rem 0.75rem;
@@ -673,7 +673,7 @@ body {
 }
 
 .agenda-item.selected {
-    background: rgba(136, 89, 255, 0.08);
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
     border-color: var(--brand-green);
 }
 
@@ -780,12 +780,12 @@ body {
 }
 
 .countdown-today {
-    background: rgba(136, 89, 255, 0.18);
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
     color: var(--primary);
 }
 
 .countdown-soon {
-    background: rgba(136, 89, 255, 0.1);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
     color: var(--on-surface-variant);
 }
 
