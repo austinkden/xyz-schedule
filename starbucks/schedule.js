@@ -9,9 +9,9 @@
 // =========================================================================
 
 const STARBUCKS_SCHEDULE = {
-    "2026-06-30": { start: "11:15", end: "15:15", notes: "Training" },
-    "2026-07-02": { start: "12:15", end: "16:15", notes: "Training, Coverage" },
-    "2026-07-03": { start: "13:30", end: "17:45", notes: "Training, Coverage" },
+    "2026-06-30": { start: "11:15", end: "15:15", notes: "" },
+    "2026-07-02": { start: "12:15", end: "16:15", notes: "" },
+    "2026-07-03": { start: "13:30", end: "17:45", notes: "" },
     "2026-07-08": { start: "11:00", end: "15:00", notes: "" },
     "2026-07-09": { start: "10:00", end: "14:00", notes: "" },
     "2026-07-10": { start: "14:00", end: "20:30", notes: "" },
@@ -23,7 +23,7 @@ const STARBUCKS_SCHEDULE = {
     "2026-07-19": { start: "12:00", end: "16:00", notes: "Same-Day Covered" },
     "2026-07-21": { start: "10:00", end: "17:00", notes: "" },
     "2026-07-22": { start: "12:00", end: "16:00", notes: "" },
-    "2026-07-23": { start: "10:45", end: "15:00", notes: "" },
+    "2026-07-23": { start: "10:45", end: "16:00", notes: "Extended Coverage (1 Hour, End)" },
     "2026-07-24": { start: "10:45", end: "14:45", notes: "" },
     "2026-07-26": { start: "08:00", end: "12:45", notes: "" },
     "2026-07-28": { start: "12:00", end: "20:30", notes: "" },
