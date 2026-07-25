@@ -77,6 +77,30 @@ img {
     scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
 }
 
+body,
+.calendar-container,
+.portal-header,
+.portal-title,
+.portal-description,
+.month-summary,
+#month-summary,
+.calendar-card,
+.details-card,
+.details-header,
+.details-body,
+.detail-row,
+.detail-label,
+.note-val,
+#details-notes,
+.countdown-badge,
+#details-countdown,
+.agenda-list,
+.agenda-item,
+.agenda-date-info,
+.agenda-details,
+.agenda-time,
+.agenda-duration,
+.agenda-notes,
 .back-link,
 .logo,
 .navigation-controls,
@@ -88,7 +112,6 @@ button,
 .day-number,
 .shift-tag,
 .status-badge,
-.detail-label,
 .brand,
 .brand h1,
 .subtitle,
@@ -100,7 +123,6 @@ button,
 .view-switcher-container,
 .view-switcher,
 .switcher-btn,
-.agenda-date-info,
 .agenda-weekday,
 .agenda-day,
 #details-date,
@@ -461,10 +483,13 @@ body {
     font-weight: 600;
 }
 
-.time-row .detail-val {
+.time-row .detail-val,
+.time-row .detail-val * {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 .duration {
