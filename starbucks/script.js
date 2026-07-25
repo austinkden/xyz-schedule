@@ -411,4 +411,65 @@ document.addEventListener("DOMContentLoaded", () => {
     const now2 = new Date();
     const todayStr2 = formatDateKey(now2.getFullYear(), now2.getMonth(), now2.getDate());
     showShiftDetails(todayStr2);
+
+    // iCal Export Handler
+    const exportIcsBtn = document.getElementById("export-ics-btn");
+    if (exportIcsBtn) {
+        exportIcsBtn.addEventListener("click", exportScheduleToICS);
+    }
+
+    function exportScheduleToICS() {
+        const schedule = window.STARBUCKS_SCHEDULE || {};
+        const icsLines = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//astrong.xyz//Starbucks Schedule//EN",
+            "CALSCALE:GREGORIAN",
+            "METHOD:PUBLISH",
+            "X-WR-CALNAME:Starbucks Shifts"
+        ];
+
+        const nowStr = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+        Object.keys(schedule).forEach((dateStr, idx) => {
+            const shift = schedule[dateStr];
+            if (!shift || !shift.start || !shift.end) return;
+
+            const dateParts = dateStr.split("-");
+            const startParts = shift.start.split(":");
+            const endParts = shift.end.split(":");
+
+            const dtStart = `${dateParts[0]}${dateParts[1]}${dateParts[2]}T${startParts[0]}${startParts[1]}00`;
+            const dtEnd = `${dateParts[0]}${dateParts[1]}${dateParts[2]}T${endParts[0]}${endParts[1]}00`;
+
+            const uid = `starbucks-shift-${dateStr}-${idx}@astrong.xyz`;
+            const summary = "Starbucks Shift";
+            const description = shift.notes ? `Shift Notes: ${shift.notes}` : "Starbucks Shift";
+
+            icsLines.push("BEGIN:VEVENT");
+            icsLines.push(`UID:${uid}`);
+            icsLines.push(`DTSTAMP:${nowStr}`);
+            icsLines.push(`DTSTART:${dtStart}`);
+            icsLines.push(`DTEND:${dtEnd}`);
+            icsLines.push(`SUMMARY:${summary}`);
+            icsLines.push(`DESCRIPTION:${description}`);
+            icsLines.push("LOCATION:Starbucks");
+            icsLines.push("END:VEVENT");
+        });
+
+        icsLines.push("END:VCALENDAR");
+
+        const icsContent = icsLines.join("\r\n");
+        const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "starbucks-schedule.ics";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        if (window.showToast) {
+            window.showToast("Exported starbucks-schedule.ics");
+        }
+    }
 });
