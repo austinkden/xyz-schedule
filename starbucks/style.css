@@ -215,7 +215,7 @@ body {
 
 .navigation-controls button:hover {
     color: var(--on-surface);
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, var(--on-surface) 10%, transparent);
 }
 
 .navigation-controls button:active {
@@ -406,7 +406,7 @@ body {
 
 /* Selected State */
 .day-cell.selected {
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, var(--on-surface) 8%, transparent);
     border-color: var(--primary);
 }
 
@@ -482,7 +482,7 @@ body {
 }
 
 .status-badge.off-badge {
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, var(--on-surface) 8%, transparent);
     color: var(--on-surface-variant);
 }
 
@@ -563,7 +563,7 @@ body {
 .settings-toggle:hover,
 .settings-toggle.active {
     color: var(--on-surface);
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, var(--on-surface) 10%, transparent);
     border-color: var(--on-surface-variant);
 }
 
@@ -619,7 +619,7 @@ body {
 
 .toggle-group {
     display: flex;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--surface-variant);
     border: 1px solid var(--outline);
     border-radius: 20px;
     padding: 2px;
@@ -645,7 +645,7 @@ body {
 
 .toggle-option.active {
     background: var(--primary);
-    color: #ffffff;
+    color: var(--on-primary, #ffffff);
 }
 
 .export-tray-buttons {
@@ -657,7 +657,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--surface-variant);
     border: 1px solid var(--outline);
     color: var(--on-surface-variant);
     font-size: 0.7rem;
@@ -689,7 +689,7 @@ body {
 
 .view-switcher {
     display: flex;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--surface-variant);
     border: 1px solid var(--outline);
     border-radius: 20px;
     padding: 2px;
@@ -715,7 +715,7 @@ body {
 
 .switcher-btn.active {
     background: var(--primary);
-    color: #ffffff;
+    color: var(--on-primary, #ffffff);
 }
 
 /* Agenda / List Layout styles */
