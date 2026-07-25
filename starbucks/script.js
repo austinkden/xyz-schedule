@@ -372,6 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showShiftDetails(formatDateKey(now.getFullYear(), now.getMonth(), now.getDate()));
     });
     document.addEventListener("keydown", (e) => {
+        if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return;
         if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
         if (e.key === "ArrowLeft")  { e.preventDefault(); currentDate.setMonth(currentDate.getMonth()-1); renderAll(); }
         else if (e.key === "ArrowRight") { e.preventDefault(); currentDate.setMonth(currentDate.getMonth()+1); renderAll(); }
