@@ -412,6 +412,154 @@ document.addEventListener("DOMContentLoaded", () => {
     const todayStr2 = formatDateKey(now2.getFullYear(), now2.getMonth(), now2.getDate());
     showShiftDetails(todayStr2);
 
+    // Automatic Google Calendar Sync (for any event named "Starbucks Shift")
+    const CALENDAR_ID = "dolphin.kden@gmail.com";
+
+    function parseIcsDateString(clean) {
+        if (!clean) return "";
+        clean = clean.trim();
+        if (clean.length === 8) {
+            return `${clean.substr(0,4)}-${clean.substr(4,2)}-${clean.substr(6,2)}`;
+        }
+        if (clean.includes("T")) {
+            const y = clean.substr(0, 4), m = clean.substr(4, 2), d = clean.substr(6, 2);
+            const hh = clean.substr(9, 2), mm = clean.substr(11, 2), ss = clean.substr(13, 2);
+            return clean.endsWith("Z") ? `${y}-${m}-${d}T${hh}:${mm}:${ss}Z` : `${y}-${m}-${d}T${hh}:${mm}:${ss}`;
+        }
+        return clean;
+    }
+
+    function parseIcsText(icsText) {
+        const events = [];
+        const vevents = icsText.split("BEGIN:VEVENT");
+        for (let i = 1; i < vevents.length; i++) {
+            const block = vevents[i].split("END:VEVENT")[0];
+            const lines = block.split(/\r?\n/);
+            let summary = "", description = "", dtstart = "", dtend = "", status = "confirmed";
+            for (let j = 0; j < lines.length; j++) {
+                let line = lines[j];
+                while (j + 1 < lines.length && (lines[j + 1].startsWith(" ") || lines[j + 1].startsWith("\t"))) {
+                    line += lines[j + 1].substring(1);
+                    j++;
+                }
+                if (line.startsWith("SUMMARY:")) summary = line.substring(8).trim();
+                else if (line.startsWith("DESCRIPTION:")) description = line.substring(12).trim().replace(/\\n/g, "\n").replace(/\\,/g, ",");
+                else if (line.startsWith("DTSTART")) {
+                    const idx = line.indexOf(":");
+                    if (idx !== -1) dtstart = parseIcsDateString(line.substring(idx + 1));
+                } else if (line.startsWith("DTEND")) {
+                    const idx = line.indexOf(":");
+                    if (idx !== -1) dtend = parseIcsDateString(line.substring(idx + 1));
+                } else if (line.startsWith("STATUS:")) status = line.substring(7).trim().toLowerCase();
+            }
+            if (dtstart && dtend) {
+                events.push({
+                    summary,
+                    description,
+                    status,
+                    start: dtstart.length === 10 ? { date: dtstart } : { dateTime: dtstart },
+                    end: dtend.length === 10 ? { date: dtend } : { dateTime: dtend }
+                });
+            }
+        }
+        return events;
+    }
+
+    async function syncCalendarShifts() {
+        let items = null;
+
+        // 1. Try serverless proxy /api/calendar
+        try {
+            const res = await fetch(`/api/calendar?calendarId=${encodeURIComponent(CALENDAR_ID)}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.items && Array.isArray(data.items)) {
+                    items = data.items;
+                }
+            }
+        } catch (err) {
+            console.warn("[Starbucks Schedule] /api/calendar endpoint unavailable, trying direct iCal proxy", err);
+        }
+
+        // 2. Direct iCal CORS proxy fallback
+        if (!items) {
+            try {
+                const icsUrl = `https://calendar.google.com/calendar/ical/${encodeURIComponent(CALENDAR_ID)}/public/basic.ics`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(icsUrl)}`;
+                const res = await fetch(proxyUrl);
+                if (res.ok) {
+                    const icsText = await res.text();
+                    items = parseIcsText(icsText);
+                }
+            } catch (err) {
+                console.warn("[Starbucks Schedule] Direct iCal fetch failed", err);
+            }
+        }
+
+        if (!items || items.length === 0) return;
+
+        const liveSchedule = {};
+        const pad = (n) => String(n).padStart(2, "0");
+
+        for (const item of items) {
+            if (item.status === "cancelled") continue;
+
+            const summary = (item.summary || "").trim();
+            const summaryLower = summary.toLowerCase();
+
+            // Match any event named "Starbucks Shift" or containing "starbucks shift" / "starbucks"
+            if (!summaryLower.includes("starbucks shift") && !summaryLower.includes("starbucks")) {
+                continue;
+            }
+
+            let startObj, endObj;
+            if (item.start && item.start.dateTime) {
+                startObj = new Date(item.start.dateTime);
+                endObj = new Date(item.end.dateTime);
+            } else if (item.start && item.start.date) {
+                const [sy, sm, sd] = item.start.date.split("-").map(Number);
+                const [ey, em, ed] = item.end.date.split("-").map(Number);
+                startObj = new Date(sy, sm - 1, sd, 0, 0, 0);
+                endObj = new Date(ey, em - 1, ed, 0, 0, 0);
+            } else {
+                continue;
+            }
+
+            if (isNaN(startObj.getTime()) || isNaN(endObj.getTime())) continue;
+
+            const dateKey = `${startObj.getFullYear()}-${pad(startObj.getMonth() + 1)}-${pad(startObj.getDate())}`;
+            const startTime = `${pad(startObj.getHours())}:${pad(startObj.getMinutes())}`;
+            const endTime = `${pad(endObj.getHours())}:${pad(endObj.getMinutes())}`;
+
+            let notes = item.description || "";
+            if (!notes) {
+                const cleaned = summary.replace(/starbucks\s*shift/i, "").replace(/starbucks/i, "").trim();
+                if (cleaned.startsWith("-") || cleaned.startsWith(":") || cleaned.startsWith("–")) {
+                    notes = cleaned.substring(1).trim();
+                } else if (cleaned) {
+                    notes = cleaned;
+                }
+            }
+
+            liveSchedule[dateKey] = {
+                start: startTime,
+                end: endTime,
+                notes: notes
+            };
+        }
+
+        if (Object.keys(liveSchedule).length > 0) {
+            window.STARBUCKS_SCHEDULE = liveSchedule;
+            renderAll();
+            if (selectedDateStr) {
+                showShiftDetails(selectedDateStr);
+            }
+        }
+    }
+
+    // Trigger auto-sync on page load
+    syncCalendarShifts();
+
     // iCal Export Handler
     const exportIcsBtn = document.getElementById("export-ics-btn");
     if (exportIcsBtn) {

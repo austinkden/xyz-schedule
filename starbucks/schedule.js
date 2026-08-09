@@ -1,11 +1,9 @@
 // =========================================================================
 // AUSTIN'S STARBUCKS SCHEDULE DATA
 // =========================================================================
-// To update your schedule, edit this file!
-// Format: "YYYY-MM-DD": { start: "HH:MM", end: "HH:MM", notes: "Notes..." }
-//
-// Keep each shift on a SINGLE LINE so that it is super easy to edit, add,
-// or replace dates in bulk (ideal for search-and-replace or AI updates).
+// Note: Starbucks shifts are automatically synced from Google Calendar
+// (any event titled "Starbucks Shift").
+// The data below serves as a static offline fallback.
 // =========================================================================
 
 const STARBUCKS_SCHEDULE = {
