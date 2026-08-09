@@ -1,45 +1,10 @@
 // =========================================================================
 // AUSTIN'S STARBUCKS SCHEDULE DATA
 // =========================================================================
-// Note: Starbucks shifts are automatically synced from Google Calendar
+// Starbucks shifts are automatically imported live from Google Calendar
 // (any event titled "Starbucks Shift").
-// The data below serves as a static offline fallback.
 // =========================================================================
 
-const STARBUCKS_SCHEDULE = {
-    "2026-06-30": { start: "11:15", end: "15:15", notes: "" },
-    "2026-07-02": { start: "12:15", end: "16:15", notes: "" },
-    "2026-07-03": { start: "13:30", end: "17:45", notes: "" },
-    "2026-07-08": { start: "11:00", end: "15:00", notes: "" },
-    "2026-07-09": { start: "10:00", end: "14:00", notes: "" },
-    "2026-07-10": { start: "14:00", end: "20:30", notes: "" },
-    "2026-07-12": { start: "09:00", end: "15:15", notes: "Picked Up - Home Store" },
-    "2026-07-14": { start: "08:30", end: "12:30", notes: "" },
-    "2026-07-15": { start: "13:00", end: "17:30", notes: "" },
-    "2026-07-16": { start: "15:15", end: "19:15", notes: "" },
-    "2026-07-18": { start: "07:45", end: "12:30", notes: "" },
-    "2026-07-19": { start: "12:00", end: "16:00", notes: "Same-Day Covered" },
-    "2026-07-21": { start: "10:00", end: "17:00", notes: "" },
-    "2026-07-22": { start: "12:00", end: "16:00", notes: "" },
-    "2026-07-23": { start: "10:45", end: "16:00", notes: "Extended Coverage (1 Hour, End)" },
-    "2026-07-24": { start: "10:45", end: "14:45", notes: "" },
-    "2026-07-26": { start: "08:00", end: "12:45", notes: "" },
-    "2026-07-28": { start: "12:00", end: "20:30", notes: "" },
-    "2026-07-29": { start: "07:15", end: "12:00", notes: "" },
-    "2026-07-30": { start: "07:00", end: "13:30", notes: "" },
-    "2026-07-31": { start: "12:45", end: "19:15", notes: "" },
-    "2026-08-02": { start: "11:00", end: "18:30", notes: "" },
-    "2026-08-03": { start: "14:15", end: "19:00", notes: "" },
-    "2026-08-05": { start: "11:15", end: "15:45", notes: "" },
-    "2026-08-06": { start: "07:00", end: "13:00", notes: "" },
-    "2026-08-08": { start: "09:30", end: "17:00", notes: "" },
-    "2026-08-09": { start: "08:00", end: "12:30", notes: "" },
-    "2026-08-15": { start: "12:00", end: "20:30", notes: "" },
-    "2026-08-16": { start: "07:30", end: "12:15", notes: "" },
-    "2026-08-18": { start: "16:00", end: "20:30", notes: "" },
-    "2026-08-21": { start: "16:00", end: "20:30", notes: "" },
-    "2026-08-22": { start: "07:30", end: "12:15", notes: "" },
-    "2026-08-23": { start: "09:30", end: "16:15", notes: "" }
-};
+const STARBUCKS_SCHEDULE = {};
 
 window.STARBUCKS_SCHEDULE = STARBUCKS_SCHEDULE;
