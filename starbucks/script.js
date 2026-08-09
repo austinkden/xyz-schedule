@@ -414,6 +414,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Automatic Google Calendar Sync (for any event named "Starbucks Shift")
     const CALENDAR_ID = "dolphin.kden@gmail.com";
+    const API_KEY = "AIzaSyBIwrZ7LnEPCEGs5CM_Pq61YtGZ3jHVQHY";
+    const CACHE_KEY = "starbucks_schedule_cache_v2";
+
+    function notifyScheduleReady() {
+        window.__ASTRONG_SCHEDULE_READY__ = true;
+        window.dispatchEvent(new Event("astrong-schedule-ready"));
+    }
+
+    // Try loading cache immediately for instant sub-millisecond render
+    try {
+        const cachedRaw = localStorage.getItem(CACHE_KEY);
+        if (cachedRaw) {
+            const cached = JSON.parse(cachedRaw);
+            if (cached && cached.data && Object.keys(cached.data).length > 0) {
+                window.STARBUCKS_SCHEDULE = Object.assign({}, window.STARBUCKS_SCHEDULE, cached.data);
+                renderAll();
+                if (selectedDateStr) showShiftDetails(selectedDateStr);
+                notifyScheduleReady();
+            }
+        }
+    } catch (e) {
+        console.warn("[Starbucks Schedule] Cache load error", e);
+    }
 
     function parseIcsDateString(clean) {
         if (!clean) return "";
@@ -468,9 +491,19 @@ document.addEventListener("DOMContentLoaded", () => {
     async function syncCalendarShifts() {
         let items = null;
 
-        // 1. Try serverless proxy /api/calendar
+        // 1. High-speed Google Calendar REST API Query with tight date bounds (-60 to +180 days)
         try {
-            const res = await fetch(`/api/calendar?calendarId=${encodeURIComponent(CALENDAR_ID)}`);
+            const now = new Date();
+            const timeMin = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString();
+            const timeMax = new Date(now.getFullYear(), now.getMonth() + 6, 1).toISOString();
+            const restUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${API_KEY}&singleEvents=true&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&orderBy=startTime`;
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 1800);
+
+            const res = await fetch(restUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
             if (res.ok) {
                 const data = await res.json();
                 if (data.items && Array.isArray(data.items)) {
@@ -478,10 +511,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         } catch (err) {
-            console.warn("[Starbucks Schedule] /api/calendar endpoint unavailable, trying direct iCal proxy", err);
+            console.warn("[Starbucks Schedule] Google Calendar REST API fast fetch skipped/failed:", err);
         }
 
-        // 2. Direct iCal CORS proxy fallback
+        // 2. Serverless proxy fallback
+        if (!items) {
+            try {
+                const res = await fetch(`/api/calendar?calendarId=${encodeURIComponent(CALENDAR_ID)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.items && Array.isArray(data.items)) {
+                        items = data.items;
+                    }
+                }
+            } catch (err) {
+                console.warn("[Starbucks Schedule] /api/calendar serverless proxy unavailable:", err);
+            }
+        }
+
+        // 3. Direct iCal CORS proxy fallback
         if (!items) {
             try {
                 const icsUrl = `https://calendar.google.com/calendar/ical/${encodeURIComponent(CALENDAR_ID)}/public/basic.ics`;
@@ -492,11 +540,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     items = parseIcsText(icsText);
                 }
             } catch (err) {
-                console.warn("[Starbucks Schedule] Direct iCal fetch failed", err);
+                console.warn("[Starbucks Schedule] Direct iCal fetch failed:", err);
             }
         }
 
-        if (!items || items.length === 0) return;
+        if (!items || items.length === 0) {
+            notifyScheduleReady();
+            return;
+        }
 
         const liveSchedule = {};
         const pad = (n) => String(n).padStart(2, "0");
@@ -550,11 +601,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (Object.keys(liveSchedule).length > 0) {
             window.STARBUCKS_SCHEDULE = liveSchedule;
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), data: liveSchedule }));
+            } catch (e) {}
             renderAll();
             if (selectedDateStr) {
                 showShiftDetails(selectedDateStr);
             }
         }
+
+        notifyScheduleReady();
     }
 
     // Trigger auto-sync on page load
