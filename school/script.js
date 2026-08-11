@@ -10,11 +10,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let currentSemester = 1;
 
-    // Cookie Utilities
+    // Cookie & Auth Utilities
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
+        try { return localStorage.getItem(name); } catch (e) {}
         return null;
     }
 
@@ -25,6 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const domainStr = window.location.hostname.endsWith('astrong.xyz') ? '; domain=.astrong.xyz' : '';
         document.cookie = `${name}=${value}; ${expires}; path=/${domainStr}; SameSite=Lax`;
         try { localStorage.setItem(name, value); } catch (e) {}
+    }
+
+    function isSchoolVerified() {
+        if (getCookie("school_verified") === "true") return true;
+        try {
+            if (localStorage.getItem("school_verified") === "true") return true;
+        } catch (e) {}
+        return false;
     }
 
     // Extract auth token from URL parameters (expects format: auth=school+[token] or auth=school [token])
@@ -198,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Client-side School Authentication Check
     function checkSchoolVerification() {
-        const isVerified = getCookie("school_verified") === "true";
+        const isVerified = isSchoolVerified();
         if (isVerified) {
             if (authOverlay) {
                 authOverlay.classList.add("hidden");
@@ -229,6 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const val = authInput ? authInput.value : "";
             if (isValidSchoolName(val)) {
                 setCookie("school_verified", "true", 450);
+                try { localStorage.setItem("school_verified", "true"); } catch (e) {}
                 if (authError) authError.style.display = "none";
                 if (authOverlay) authOverlay.classList.add("hidden");
                 renderSchedule();
@@ -265,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!scheduleGrid) return;
         scheduleGrid.innerHTML = "";
 
-        const isVerified = getCookie("school_verified") === "true";
+        const isVerified = isSchoolVerified();
         const scheduleData = window.SCHOOL_SCHEDULE || {};
         const semesterKey = currentSemester === 1 ? "semester1" : "semester2";
         const realClasses = scheduleData[semesterKey] || [];
@@ -324,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize Page
     const urlToken = extractSchoolAuthToken();
-    const isAlreadyVerified = getCookie("school_verified") === "true";
+    const isAlreadyVerified = isSchoolVerified();
 
     if (urlToken) {
         window.__ASTRONG_WAIT_FOR_SCHEDULE__ = true;

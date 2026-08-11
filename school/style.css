@@ -314,9 +314,18 @@ body {
 }
 
 /* Mobile Responsiveness */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+    body {
+        padding-top: 1.25rem;
+    }
+
     .back-link {
-        top: 20px;
-        left: 20px;
+        position: relative;
+        top: 0;
+        left: 0;
+        align-self: flex-start;
+        width: 100%;
+        max-width: 800px;
+        margin-bottom: 1rem;
     }
 }
