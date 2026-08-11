@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
-            let tokenRef = doc(db, "school_auth_tokens", token);
+            let tokenRef = doc(db, "tokens", token);
 
             const fetchPromise = getDoc(tokenRef);
             const timeoutPromise = new Promise((_, reject) => 
@@ -66,14 +66,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let tokenSnap = await Promise.race([fetchPromise, timeoutPromise]);
             
-            // Fallback for legacy tokens stored without "school+" prefix
-            if ((!tokenSnap || !tokenSnap.exists()) && token.startsWith("school+")) {
-                const legacyToken = token.slice(7);
-                if (legacyToken) {
-                    const legacyRef = doc(db, "school_auth_tokens", legacyToken);
-                    tokenSnap = await getDoc(legacyRef).catch(() => null);
-                    if (tokenSnap && tokenSnap.exists()) {
-                        tokenRef = legacyRef;
+            // Fallback for tokens in legacy collection "school_auth_tokens" or legacy tokens stored without "school+" prefix
+            if (!tokenSnap || !tokenSnap.exists()) {
+                const legacyCollRef = doc(db, "school_auth_tokens", token);
+                tokenSnap = await getDoc(legacyCollRef).catch(() => null);
+                if (tokenSnap && tokenSnap.exists()) {
+                    tokenRef = legacyCollRef;
+                } else if (token.startsWith("school+")) {
+                    const legacyToken = token.slice(7);
+                    if (legacyToken) {
+                        const legacyRef = doc(db, "tokens", legacyToken);
+                        tokenSnap = await getDoc(legacyRef).catch(() => null);
+                        if (tokenSnap && tokenSnap.exists()) {
+                            tokenRef = legacyRef;
+                        } else {
+                            const legacyCollRef2 = doc(db, "school_auth_tokens", legacyToken);
+                            tokenSnap = await getDoc(legacyCollRef2).catch(() => null);
+                            if (tokenSnap && tokenSnap.exists()) {
+                                tokenRef = legacyCollRef2;
+                            }
+                        }
                     }
                 }
             }
