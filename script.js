@@ -339,4 +339,139 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // 3. Starbucks Live Shift Description Countdown on Schedule Landing Page
+    initStarbucksCardCountdown();
 });
+
+function initStarbucksCardCountdown() {
+    const descEl = document.getElementById("starbucks-card-desc");
+    if (!descEl) return;
+
+    const CALENDAR_ID = "dolphin.kden@gmail.com";
+    const API_KEY = "AIzaSyBIwrZ7LnEPCEGs5CM_Pq61YtGZ3jHVQHY";
+    const CACHE_KEY = "starbucks_schedule_cache_v2";
+
+    let shiftList = [];
+
+    function parseShiftEvents(items) {
+        const result = [];
+        if (!Array.isArray(items)) return result;
+
+        for (const item of items) {
+            if (item.status === "cancelled") continue;
+            const summary = (item.summary || "").toLowerCase();
+            if (!summary.includes("starbucks shift") && !summary.includes("starbucks")) continue;
+
+            let startObj, endObj;
+            if (item.start && item.start.dateTime) {
+                startObj = new Date(item.start.dateTime);
+                endObj = new Date(item.end.dateTime);
+            } else if (item.start && item.start.date) {
+                startObj = new Date(`${item.start.date}T00:00:00`);
+                endObj = new Date(`${item.end.date}T23:59:59`);
+            }
+            if (startObj && endObj && !isNaN(startObj.getTime())) {
+                result.push({ start: startObj, end: endObj });
+            }
+        }
+        return result;
+    }
+
+    function loadCachedShifts() {
+        try {
+            const raw = localStorage.getItem(CACHE_KEY);
+            if (raw) {
+                const cached = JSON.parse(raw);
+                if (cached && cached.data) {
+                    const arr = [];
+                    Object.keys(cached.data).forEach(dateKey => {
+                        const shift = cached.data[dateKey];
+                        if (shift && shift.start && shift.end) {
+                            const startObj = new Date(`${dateKey}T${shift.start}:00`);
+                            const endObj = new Date(`${dateKey}T${shift.end}:00`);
+                            if (!isNaN(startObj.getTime())) {
+                                arr.push({ start: startObj, end: endObj });
+                            }
+                        }
+                    });
+                    if (arr.length > 0) shiftList = arr;
+                }
+            }
+        } catch (e) {}
+    }
+
+    async function fetchShifts() {
+        loadCachedShifts();
+        updateCountdown();
+
+        const timeMin = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const timeMax = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
+        const restUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${API_KEY}&singleEvents=true&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&orderBy=startTime`;
+
+        try {
+            const res = await fetch(restUrl);
+            if (res.ok) {
+                const data = await res.json();
+                const fetched = parseShiftEvents(data.items);
+                if (fetched.length > 0) {
+                    shiftList = fetched;
+                    updateCountdown();
+                    return;
+                }
+            }
+        } catch (err) {}
+
+        try {
+            const proxyRes = await fetch(`/api/calendar?calendarId=${encodeURIComponent(CALENDAR_ID)}`);
+            if (proxyRes.ok) {
+                const data = await proxyRes.json();
+                const fetched = parseShiftEvents(data.items);
+                if (fetched.length > 0) {
+                    shiftList = fetched;
+                    updateCountdown();
+                }
+            }
+        } catch (err) {}
+    }
+
+    function updateCountdown() {
+        if (!descEl) return;
+        const now = new Date();
+
+        // Check if currently working
+        const currentShift = shiftList.find(s => s.start <= now && now < s.end);
+        if (currentShift) {
+            descEl.textContent = "Currently at work!";
+            return;
+        }
+
+        // Find next upcoming shift
+        const upcoming = shiftList
+            .filter(s => s.start > now)
+            .sort((a, b) => a.start - b.start)[0];
+
+        if (!upcoming) {
+            descEl.textContent = "View my work shifts for Starbucks";
+            return;
+        }
+
+        const diffSec = Math.max(1, (upcoming.start.getTime() - now.getTime()) / 1000);
+        if (diffSec >= 86400) {
+            const days = Math.floor(diffSec / 86400);
+            descEl.textContent = `Next shift in ${days} day${days !== 1 ? "s" : ""}`;
+        } else if (diffSec >= 3600) {
+            const hours = Math.floor(diffSec / 3600);
+            descEl.textContent = `Next shift in ${hours} hour${hours !== 1 ? "s" : ""}`;
+        } else if (diffSec >= 60) {
+            const mins = Math.floor(diffSec / 60);
+            descEl.textContent = `Next shift in ${mins} minute${mins !== 1 ? "s" : ""}`;
+        } else {
+            const secs = Math.floor(diffSec);
+            descEl.textContent = `Next shift in ${secs} second${secs !== 1 ? "s" : ""}`;
+        }
+    }
+
+    fetchShifts();
+    setInterval(updateCountdown, 1000);
+}

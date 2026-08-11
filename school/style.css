@@ -1,0 +1,311 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Google+Sans+Flex:opsz,slnt,wdth,wght,GRAD,ROND@6..144,-10..0,25..151,1..1000,0..100,0..100&display=swap');
+
+/* Base reset and design tokens matching astrong.xyz minimalist theme */
+:root {
+    --bg-color: #121212;
+    --surface-color: #1d1b20;
+    --surface-variant: #2d2a33;
+    --outline-color: #49454f;
+    --text-primary: #e6e1e5;
+    --text-secondary: #cac4d0;
+    --accent-color: #8859ff;
+    --accent-light: #f2edff;
+    --error-color: #ff5252;
+}
+
+:root.light-mode {
+    --bg-color: #fdfbff;
+    --surface-color: #f5f2fa;
+    --surface-variant: #e7e0ec;
+    --outline-color: #79747e;
+    --text-primary: #1d1b20;
+    --text-secondary: #49454f;
+    --accent-color: #8859ff;
+    --accent-light: #f2edff;
+    --error-color: #d32f2f;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Google Sans Flex', 'Google Sans', sans-serif;
+}
+
+::selection {
+    background-color: var(--accent-light);
+    color: var(--accent-color);
+}
+
+::-moz-selection {
+    background-color: var(--accent-light);
+    color: var(--accent-color);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'Google Sans Flex', 'Google Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+}
+
+/* Header & Portal Container */
+.portal-container {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.15s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    width: fit-content;
+}
+
+.back-link:hover {
+    color: var(--text-primary);
+}
+
+.portal-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Named portal-title to prevent root script.js H1 query overrides */
+.portal-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.portal-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+/* Always-Visible Semester Toggle Bar */
+.semester-toggle-container {
+    display: flex;
+    align-items: center;
+    background-color: var(--surface-color);
+    border: 1px solid var(--outline-color);
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.semester-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.semester-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--surface-variant);
+}
+
+.semester-btn.active {
+    background-color: var(--accent-color);
+    color: #ffffff;
+}
+
+/* Schedule Card Grid */
+.schedule-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    width: 100%;
+}
+
+.class-card {
+    background-color: var(--surface-color);
+    border: 1px solid var(--outline-color);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: border-color 0.15s ease;
+}
+
+.class-card:hover {
+    border-color: var(--accent-color);
+}
+
+.class-left {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+}
+
+.period-badge {
+    background-color: var(--surface-variant);
+    border: 1px solid var(--outline-color);
+    color: var(--text-primary);
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.class-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.class-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.class-teacher {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.class-room-badge {
+    background-color: var(--surface-variant);
+    border: 1px solid var(--outline-color);
+    color: var(--text-secondary);
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    user-select: none;
+    -webkit-user-select: none;
+    white-space: nowrap;
+}
+
+/* Verification Gate Modal */
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(18, 16, 22, 0.92);
+    backdrop-filter: blur(6px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 1;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.auth-modal-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.auth-modal-container {
+    background-color: var(--surface-color);
+    border: 1px solid var(--outline-color);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 440px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow: none;
+}
+
+.auth-modal-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.auth-modal-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.auth-input {
+    width: 100%;
+    background-color: var(--bg-color);
+    border: 1px solid var(--outline-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.auth-input:focus {
+    border-color: var(--accent-color);
+}
+
+.auth-error {
+    color: var(--error-color);
+    font-size: 0.85rem;
+    display: none;
+}
+
+.auth-submit-btn {
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.auth-submit-btn:hover {
+    opacity: 0.9;
+}
