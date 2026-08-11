@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data && data.active === true) {
                     // Non-blocking increment of token usage count & auto-deactivation if one-time use
                     try {
-                        const { updateDoc, increment, arrayUnion } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                        const { setDoc, increment, arrayUnion } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
                         const updatePayload = {
                             usesCount: increment(1),
                             lastUsedAt: new Date().toISOString()
@@ -91,13 +91,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (data.oneTimeUse === true) {
                             updatePayload.active = false;
                         }
-                        updateDoc(tokenRef, updatePayload).catch(e => console.warn("[School Auth] Could not update token record:", e));
+                        setDoc(tokenRef, updatePayload, { merge: true }).catch(e => console.warn("[School Auth] Could not update token record:", e));
 
                         // Log token redemption to visitor's device telemetry
                         const deviceId = getCookie('astrong_device_id') || localStorage.getItem('astrong_device_id') || window.__ASTRONG_DEVICE_ID__;
                         if (deviceId) {
                             const deviceRef = doc(db, "devices", deviceId);
-                            updateDoc(deviceRef, {
+                            setDoc(deviceRef, {
                                 tokenUsages: arrayUnion({
                                     token: token,
                                     tokenType: "school",
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                     usedAt: new Date().toISOString(),
                                     page: window.location.pathname
                                 })
-                            }).catch(e => console.warn("[Telemetry] Could not log token usage to device:", e));
+                            }, { merge: true }).catch(e => console.warn("[Telemetry] Could not log token usage to device:", e));
                         }
                     } catch (e) {}
                     return true;
@@ -228,17 +228,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const urlToken = extractSchoolAuthToken();
     const isAlreadyVerified = getCookie("school_verified") === "true";
 
-    if (!isAlreadyVerified && urlToken) {
+    if (urlToken) {
         window.__ASTRONG_WAIT_FOR_SCHEDULE__ = true;
         verifyUrlToken(urlToken).then((isValid) => {
             if (isValid) {
                 setCookie("school_verified", "true", 450);
                 if (authOverlay) authOverlay.classList.add("hidden");
-            } else {
+            } else if (!isAlreadyVerified) {
                 if (authOverlay) {
                     authOverlay.classList.remove("hidden");
                     setTimeout(() => authInput && authInput.focus(), 100);
                 }
+            } else {
+                checkSchoolVerification();
             }
             renderSchedule();
             window.__ASTRONG_SCHEDULE_READY__ = true;
