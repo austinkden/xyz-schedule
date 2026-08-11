@@ -25,6 +25,54 @@ document.addEventListener("DOMContentLoaded", () => {
         document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Lax`;
     }
 
+    // Extract auth token from URL parameters (expects format: auth=school+[token] or auth=school [token])
+    function extractSchoolAuthToken() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const rawAuth = urlParams.get("auth") || "";
+            if (!rawAuth) return null;
+            if (rawAuth.startsWith("school+")) {
+                return rawAuth.slice(7).trim();
+            }
+            if (rawAuth.startsWith("school ")) {
+                return rawAuth.slice(7).trim();
+            }
+        } catch (e) {
+            console.error("[School Auth] Error parsing URL auth param:", e);
+        }
+        return null;
+    }
+
+    // Client-side Firestore Token Verification with Timeout
+    async function verifyUrlToken(token) {
+        if (!token) return false;
+        try {
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+            const { getFirestore, doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+            const { firebaseConfig } = await import("/firebase-config.js");
+
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const tokenRef = doc(db, "school_auth_tokens", token);
+
+            const fetchPromise = getDoc(tokenRef);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("Token verification timeout")), 2500)
+            );
+
+            const tokenSnap = await Promise.race([fetchPromise, timeoutPromise]);
+            if (tokenSnap && tokenSnap.exists()) {
+                const data = tokenSnap.data();
+                if (data && data.active === true) {
+                    return true;
+                }
+            }
+        } catch (err) {
+            console.warn("[School Auth] Token verification error or timeout:", err);
+        }
+        return false;
+    }
+
     // Client-side School Authentication Check
     function checkSchoolVerification() {
         const isVerified = getCookie("school_verified") === "true";
@@ -57,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const val = authInput ? authInput.value : "";
             if (isValidSchoolName(val)) {
-                setCookie("school_verified", "true", 365);
+                setCookie("school_verified", "true", 450);
                 if (authError) authError.style.display = "none";
                 if (authOverlay) authOverlay.classList.add("hidden");
                 renderSchedule();
@@ -133,6 +181,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Initialize Page
-    checkSchoolVerification();
-    renderSchedule();
+    const urlToken = extractSchoolAuthToken();
+    const isAlreadyVerified = getCookie("school_verified") === "true";
+
+    if (!isAlreadyVerified && urlToken) {
+        window.__ASTRONG_WAIT_FOR_SCHEDULE__ = true;
+        verifyUrlToken(urlToken).then((isValid) => {
+            if (isValid) {
+                setCookie("school_verified", "true", 450);
+                if (authOverlay) authOverlay.classList.add("hidden");
+            } else {
+                if (authOverlay) {
+                    authOverlay.classList.remove("hidden");
+                    setTimeout(() => authInput && authInput.focus(), 100);
+                }
+            }
+            renderSchedule();
+            window.__ASTRONG_SCHEDULE_READY__ = true;
+            const loader = document.getElementById('astrong-loading-screen');
+            if (loader) {
+                loader.classList.add('fade-out');
+                setTimeout(() => {
+                    if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+                }, 300);
+            }
+        });
+    } else {
+        checkSchoolVerification();
+        renderSchedule();
+    }
 });
