@@ -64,6 +64,18 @@ document.addEventListener("DOMContentLoaded", () => {
             if (tokenSnap && tokenSnap.exists()) {
                 const data = tokenSnap.data();
                 if (data && data.active === true) {
+                    // Non-blocking increment of token usage count & auto-deactivation if one-time use
+                    try {
+                        const { updateDoc, increment } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                        const updatePayload = {
+                            usesCount: increment(1),
+                            lastUsedAt: new Date().toISOString()
+                        };
+                        if (data.oneTimeUse === true) {
+                            updatePayload.active = false;
+                        }
+                        updateDoc(tokenRef, updatePayload).catch(e => console.warn("[School Auth] Could not update usesCount:", e));
+                    } catch (e) {}
                     return true;
                 }
             }
