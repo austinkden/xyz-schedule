@@ -31,14 +31,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function extractSchoolAuthToken() {
         try {
             const urlParams = new URLSearchParams(window.location.search);
-            const rawAuth = urlParams.get("auth") || "";
+            let rawAuth = urlParams.get("auth") || "";
             if (!rawAuth) return null;
-            if (rawAuth.startsWith("school+")) {
-                return rawAuth.slice(7).trim();
-            }
+            rawAuth = rawAuth.trim();
             if (rawAuth.startsWith("school ")) {
-                return rawAuth.slice(7).trim();
+                return "school+" + rawAuth.slice(7).trim();
             }
+            if (rawAuth.startsWith("school+")) {
+                return rawAuth;
+            }
+            return "school+" + rawAuth;
         } catch (e) {
             console.error("[School Auth] Error parsing URL auth param:", e);
         }
@@ -55,14 +57,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
-            const tokenRef = doc(db, "school_auth_tokens", token);
+            let tokenRef = doc(db, "school_auth_tokens", token);
 
             const fetchPromise = getDoc(tokenRef);
             const timeoutPromise = new Promise((_, reject) => 
                 setTimeout(() => reject(new Error("Token verification timeout")), 2500)
             );
 
-            const tokenSnap = await Promise.race([fetchPromise, timeoutPromise]);
+            let tokenSnap = await Promise.race([fetchPromise, timeoutPromise]);
+            
+            // Fallback for legacy tokens stored without "school+" prefix
+            if ((!tokenSnap || !tokenSnap.exists()) && token.startsWith("school+")) {
+                const legacyToken = token.slice(7);
+                if (legacyToken) {
+                    const legacyRef = doc(db, "school_auth_tokens", legacyToken);
+                    tokenSnap = await getDoc(legacyRef).catch(() => null);
+                    if (tokenSnap && tokenSnap.exists()) {
+                        tokenRef = legacyRef;
+                    }
+                }
+            }
+
             if (tokenSnap && tokenSnap.exists()) {
                 const data = tokenSnap.data();
                 if (data && data.active === true) {
