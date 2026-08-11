@@ -90,10 +90,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
+            const deviceId = getCookie('astrong_device_id') || localStorage.getItem('astrong_device_id') || window.__ASTRONG_DEVICE_ID__;
+
             if (tokenSnap && tokenSnap.exists()) {
                 const data = tokenSnap.data();
                 if (data && data.active === true) {
-                    // Non-blocking increment of token usage count & auto-deactivation if one-time use
+                    // Valid active token
                     try {
                         const { setDoc, increment, arrayUnion } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
                         const updatePayload = {
@@ -105,8 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                         setDoc(tokenRef, updatePayload, { merge: true }).catch(e => console.warn("[School Auth] Could not update token record:", e));
 
-                        // Log token redemption to visitor's device telemetry
-                        const deviceId = getCookie('astrong_device_id') || localStorage.getItem('astrong_device_id') || window.__ASTRONG_DEVICE_ID__;
+                        // Log valid token redemption to visitor's device telemetry
                         if (deviceId) {
                             const deviceRef = doc(db, "devices", deviceId);
                             setDoc(deviceRef, {
@@ -115,16 +116,82 @@ document.addEventListener("DOMContentLoaded", () => {
                                     tokenType: "school",
                                     label: data.label || "Unlabeled Token",
                                     usedAt: new Date().toISOString(),
-                                    page: window.location.pathname
-                                })
+                                    page: window.location.pathname,
+                                    valid: true,
+                                    status: "valid"
+                                }),
+                                "authorizations.schoolSchedule": true,
+                                schoolVerified: true
                             }, { merge: true }).catch(e => console.warn("[Telemetry] Could not log token usage to device:", e));
                         }
                     } catch (e) {}
                     return true;
+                } else {
+                    // Token exists but is inactive / revoked
+                    if (deviceId) {
+                        try {
+                            const { setDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                            const deviceRef = doc(db, "devices", deviceId);
+                            setDoc(deviceRef, {
+                                tokenUsages: arrayUnion({
+                                    token: token,
+                                    tokenType: "school",
+                                    label: data && data.label ? `${data.label} (Inactive)` : "Inactive Token",
+                                    usedAt: new Date().toISOString(),
+                                    page: window.location.pathname,
+                                    valid: false,
+                                    status: "inactive"
+                                })
+                            }, { merge: true }).catch(e => console.warn("[Telemetry] Could not log inactive token attempt:", e));
+                        } catch (e) {}
+                    }
+                    return false;
                 }
+            } else {
+                // Token does NOT exist (invalid / unknown token attempt)
+                if (deviceId) {
+                    try {
+                        const { setDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                        const deviceRef = doc(db, "devices", deviceId);
+                        setDoc(deviceRef, {
+                            tokenUsages: arrayUnion({
+                                token: token,
+                                tokenType: "school",
+                                label: "Invalid / Unknown Token",
+                                usedAt: new Date().toISOString(),
+                                page: window.location.pathname,
+                                valid: false,
+                                status: "invalid"
+                            })
+                        }, { merge: true }).catch(e => console.warn("[Telemetry] Could not log invalid token attempt:", e));
+                    } catch (e) {}
+                }
+                return false;
             }
         } catch (err) {
             console.warn("[School Auth] Token verification error or timeout:", err);
+            try {
+                const deviceId = getCookie('astrong_device_id') || localStorage.getItem('astrong_device_id') || window.__ASTRONG_DEVICE_ID__;
+                if (deviceId) {
+                    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+                    const { getFirestore, doc, setDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                    const { firebaseConfig } = await import("https://astrong.xyz/firebase-config.js");
+                    const app = initializeApp(firebaseConfig);
+                    const db = getFirestore(app);
+                    const deviceRef = doc(db, "devices", deviceId);
+                    setDoc(deviceRef, {
+                        tokenUsages: arrayUnion({
+                            token: token,
+                            tokenType: "school",
+                            label: "Verification Error",
+                            usedAt: new Date().toISOString(),
+                            page: window.location.pathname,
+                            valid: false,
+                            status: "error"
+                        })
+                    }, { merge: true }).catch(() => {});
+                }
+            } catch (e) {}
         }
         return false;
     }
@@ -165,6 +232,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (authError) authError.style.display = "none";
                 if (authOverlay) authOverlay.classList.add("hidden");
                 renderSchedule();
+
+                // Update device telemetry authorization
+                try {
+                    const deviceId = getCookie('astrong_device_id') || localStorage.getItem('astrong_device_id') || window.__ASTRONG_DEVICE_ID__;
+                    if (deviceId) {
+                        import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js").then(({ initializeApp }) => {
+                            import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js").then(({ getFirestore, doc, setDoc }) => {
+                                import("https://astrong.xyz/firebase-config.js").then(({ firebaseConfig }) => {
+                                    const app = initializeApp(firebaseConfig);
+                                    const db = getFirestore(app);
+                                    setDoc(doc(db, "devices", deviceId), {
+                                        "authorizations.schoolSchedule": true,
+                                        schoolVerified: true
+                                    }, { merge: true }).catch(() => {});
+                                });
+                            });
+                        });
+                    }
+                } catch(e) {}
             } else {
                 if (authError) {
                     authError.textContent = "Incorrect school name. Please try again.";
