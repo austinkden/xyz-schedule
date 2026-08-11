@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data && data.active === true) {
                     // Non-blocking increment of token usage count & auto-deactivation if one-time use
                     try {
-                        const { updateDoc, increment } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+                        const { updateDoc, increment, arrayUnion } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
                         const updatePayload = {
                             usesCount: increment(1),
                             lastUsedAt: new Date().toISOString()
@@ -74,7 +74,22 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (data.oneTimeUse === true) {
                             updatePayload.active = false;
                         }
-                        updateDoc(tokenRef, updatePayload).catch(e => console.warn("[School Auth] Could not update usesCount:", e));
+                        updateDoc(tokenRef, updatePayload).catch(e => console.warn("[School Auth] Could not update token record:", e));
+
+                        // Log token redemption to visitor's device telemetry
+                        const deviceId = localStorage.getItem('astrong_device_id') || window.__ASTRONG_DEVICE_ID__;
+                        if (deviceId) {
+                            const deviceRef = doc(db, "devices", deviceId);
+                            updateDoc(deviceRef, {
+                                tokenUsages: arrayUnion({
+                                    token: token,
+                                    tokenType: "school",
+                                    label: data.label || "Unlabeled Token",
+                                    usedAt: new Date().toISOString(),
+                                    page: window.location.pathname
+                                })
+                            }).catch(e => console.warn("[Telemetry] Could not log token usage to device:", e));
+                        }
                     } catch (e) {}
                     return true;
                 }
