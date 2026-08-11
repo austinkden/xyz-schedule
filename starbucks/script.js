@@ -363,24 +363,42 @@ document.addEventListener("DOMContentLoaded", () => {
         renderAll();
     }
 
-    prevMonthBtn.addEventListener("click", () => { currentDate.setMonth(currentDate.getMonth()-1); renderAll(); });
-    nextMonthBtn.addEventListener("click", () => { currentDate.setMonth(currentDate.getMonth()+1); renderAll(); });
+    prevMonthBtn.addEventListener("click", () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderAll();
+        syncCalendarShifts(currentDate);
+    });
+    nextMonthBtn.addEventListener("click", () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderAll();
+        syncCalendarShifts(currentDate);
+    });
     currentMonthYearHeader.addEventListener("click", () => {
         const now = new Date();
         currentDate = new Date(now.getFullYear(), now.getMonth(), 1);
         renderAll();
         showShiftDetails(formatDateKey(now.getFullYear(), now.getMonth(), now.getDate()));
+        syncCalendarShifts(currentDate);
     });
     document.addEventListener("keydown", (e) => {
         if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return;
         if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-        if (e.key === "ArrowLeft")  { e.preventDefault(); currentDate.setMonth(currentDate.getMonth()-1); renderAll(); }
-        else if (e.key === "ArrowRight") { e.preventDefault(); currentDate.setMonth(currentDate.getMonth()+1); renderAll(); }
-        else if (e.key === "t" || e.key === "T") {
+        if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderAll();
+            syncCalendarShifts(currentDate);
+        } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderAll();
+            syncCalendarShifts(currentDate);
+        } else if (e.key === "t" || e.key === "T") {
             const now = new Date();
             currentDate = new Date(now.getFullYear(), now.getMonth(), 1);
             renderAll();
             showShiftDetails(formatDateKey(now.getFullYear(), now.getMonth(), now.getDate()));
+            syncCalendarShifts(currentDate);
         }
     });
     btnViewMonth.addEventListener("click", () => setView("month"));
@@ -488,27 +506,53 @@ document.addEventListener("DOMContentLoaded", () => {
         return events;
     }
 
-    async function syncCalendarShifts() {
+    const fetchedMonths = new Set();
+    let activeSyncPromise = null;
+
+    async function syncCalendarShifts(targetDate = currentDate) {
+        const baseDate = targetDate || currentDate || new Date();
+        const targetY = baseDate.getFullYear();
+        const targetM = baseDate.getMonth();
+        const monthKey = `${targetY}-${targetM}`;
+
+        if (fetchedMonths.has(monthKey)) {
+            notifyScheduleReady();
+            return;
+        }
+
         let items = null;
 
-        // 1. High-speed Google Calendar REST API Query with tight date bounds (-60 to +180 days)
+        // 1. High-speed Google Calendar REST API Query with pagination & maxResults=2500
         try {
-            const now = new Date();
-            const timeMin = new Date(now.getFullYear(), now.getMonth() - 2, 1).toISOString();
-            const timeMax = new Date(now.getFullYear(), now.getMonth() + 6, 1).toISOString();
-            const restUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${API_KEY}&singleEvents=true&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&orderBy=startTime`;
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1800);
+            const timeMin = new Date(targetY, targetM - 2, 1).toISOString();
+            const timeMax = new Date(targetY, targetM + 6, 1).toISOString();
 
-            const res = await fetch(restUrl, { signal: controller.signal });
-            clearTimeout(timeoutId);
-
-            if (res.ok) {
-                const data = await res.json();
-                if (data.items && Array.isArray(data.items)) {
-                    items = data.items;
+            let pageToken = "";
+            let allItems = [];
+            do {
+                let restUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${API_KEY}&singleEvents=true&maxResults=2500&timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&orderBy=startTime`;
+                if (pageToken) {
+                    restUrl += `&pageToken=${encodeURIComponent(pageToken)}`;
                 }
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+                const res = await fetch(restUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.items && Array.isArray(data.items)) {
+                        allItems.push(...data.items);
+                    }
+                    pageToken = data.nextPageToken || "";
+                } else {
+                    break;
+                }
+            } while (pageToken);
+
+            if (allItems.length > 0) {
+                items = allItems;
             }
         } catch (err) {
             console.warn("[Starbucks Schedule] Google Calendar REST API fast fetch skipped/failed:", err);
@@ -600,10 +644,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (Object.keys(liveSchedule).length > 0) {
-            window.STARBUCKS_SCHEDULE = liveSchedule;
+            window.STARBUCKS_SCHEDULE = Object.assign({}, window.STARBUCKS_SCHEDULE || {}, liveSchedule);
             try {
-                localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), data: liveSchedule }));
+                const rawCache = localStorage.getItem(CACHE_KEY);
+                let cachedData = {};
+                if (rawCache) {
+                    const parsed = JSON.parse(rawCache);
+                    if (parsed && parsed.data) cachedData = parsed.data;
+                }
+                const mergedCache = Object.assign({}, cachedData, window.STARBUCKS_SCHEDULE);
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), data: mergedCache }));
             } catch (e) {}
+
+            for (let offset = -2; offset <= 5; offset++) {
+                const d = new Date(targetY, targetM + offset, 1);
+                fetchedMonths.add(`${d.getFullYear()}-${d.getMonth()}`);
+            }
+
             renderAll();
             if (selectedDateStr) {
                 showShiftDetails(selectedDateStr);
