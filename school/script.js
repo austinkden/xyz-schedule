@@ -22,7 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const d = new Date();
         d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
         const expires = `expires=${d.toUTCString()}`;
-        document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Lax`;
+        const domainStr = window.location.hostname.endsWith('astrong.xyz') ? '; domain=.astrong.xyz' : '';
+        document.cookie = `${name}=${value}; ${expires}; path=/${domainStr}; SameSite=Lax`;
+        try { localStorage.setItem(name, value); } catch (e) {}
     }
 
     // Extract auth token from URL parameters (expects format: auth=school+[token] or auth=school [token])
@@ -77,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         updateDoc(tokenRef, updatePayload).catch(e => console.warn("[School Auth] Could not update token record:", e));
 
                         // Log token redemption to visitor's device telemetry
-                        const deviceId = localStorage.getItem('astrong_device_id') || window.__ASTRONG_DEVICE_ID__;
+                        const deviceId = getCookie('astrong_device_id') || localStorage.getItem('astrong_device_id') || window.__ASTRONG_DEVICE_ID__;
                         if (deviceId) {
                             const deviceRef = doc(db, "devices", deviceId);
                             updateDoc(deviceRef, {
