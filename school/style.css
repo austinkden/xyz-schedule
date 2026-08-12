@@ -324,8 +324,7 @@ body {
         top: 0;
         left: 0;
         align-self: flex-start;
-        width: 100%;
-        max-width: 800px;
-        margin-bottom: 1rem;
+        width: auto;
+        margin-bottom: 0.5rem;
     }
 }
