@@ -25,8 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
         const expires = `expires=${d.toUTCString()}`;
         const domainStr = window.location.hostname.endsWith('astrong.xyz') ? '; domain=.astrong.xyz' : '';
-        const secureStr = window.location.protocol === 'https:' ? '; Secure' : '';
-        document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Lax${domainStr}${secureStr}`;
+        document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Lax; Secure${domainStr}`;
         try { localStorage.setItem(name, value); } catch (e) {}
     }
 
