@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const scheduleGrid = document.getElementById("schedule-grid");
 
     let currentSemester = 1;
+    let sessionVerified = false;
 
     // Cookie & Auth Utilities
     function getCookie(name) {
@@ -24,11 +25,13 @@ document.addEventListener("DOMContentLoaded", () => {
         d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
         const expires = `expires=${d.toUTCString()}`;
         const domainStr = window.location.hostname.endsWith('astrong.xyz') ? '; domain=.astrong.xyz' : '';
-        document.cookie = `${name}=${value}; ${expires}; path=/${domainStr}; SameSite=Lax`;
+        const secureStr = window.location.protocol === 'https:' ? '; Secure' : '';
+        document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Lax${domainStr}${secureStr}`;
         try { localStorage.setItem(name, value); } catch (e) {}
     }
 
     function isSchoolVerified() {
+        if (sessionVerified) return true;
         if (getCookie("school_verified") === "true") return true;
         try {
             if (localStorage.getItem("school_verified") === "true") return true;
@@ -237,6 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const val = authInput ? authInput.value : "";
             if (isValidSchoolName(val)) {
+                sessionVerified = true;
                 setCookie("school_verified", "true", 450);
                 try { localStorage.setItem("school_verified", "true"); } catch (e) {}
                 if (authError) authError.style.display = "none";
@@ -340,6 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.__ASTRONG_WAIT_FOR_SCHEDULE__ = true;
         verifyUrlToken(urlToken).then((isValid) => {
             if (isValid) {
+                sessionVerified = true;
                 setCookie("school_verified", "true", 450);
                 if (authOverlay) authOverlay.classList.add("hidden");
             } else if (!isAlreadyVerified) {
