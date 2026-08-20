@@ -50,11 +50,12 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2rem 1rem 4rem;
+    padding: 0; margin: 0;
 }
 
 /* Header & Portal Container */
 .portal-container {
+    padding: 40px 15px 30px;
     width: 100%;
     max-width: 800px;
     display: flex;
@@ -64,7 +65,7 @@ body {
 
 .back-link {
     position: absolute;
-    top: 30px;
+    top: 75px;
     left: 30px;
     z-index: 1000;
     display: inline-flex;
@@ -95,6 +96,8 @@ body {
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--text-primary);
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .portal-subtitle {
@@ -316,7 +319,7 @@ body {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     body {
-        padding-top: 1.25rem;
+        padding-top: 0;
     }
 
     .back-link {

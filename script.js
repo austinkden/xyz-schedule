@@ -442,7 +442,7 @@ function initStarbucksCardCountdown() {
         // Check if currently working
         const currentShift = shiftList.find(s => s.start <= now && now < s.end);
         if (currentShift) {
-            descEl.textContent = "Currently at work!";
+            descEl.textContent = "Currently at work";
             return;
         }
 
@@ -457,9 +457,14 @@ function initStarbucksCardCountdown() {
         }
 
         const diffSec = Math.max(1, (upcoming.start.getTime() - now.getTime()) / 1000);
-        if (diffSec >= 86400) {
-            const days = Math.floor(diffSec / 86400);
-            descEl.textContent = `Next shift in ${days} day${days !== 1 ? "s" : ""}`;
+        const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const shiftDate = new Date(upcoming.start.getFullYear(), upcoming.start.getMonth(), upcoming.start.getDate());
+        const calDaysDiff = Math.round((shiftDate - todayDate) / 86400000);
+
+        if (calDaysDiff >= 2) {
+            descEl.textContent = `Next shift in ${calDaysDiff} days`;
+        } else if (calDaysDiff === 1 && diffSec >= 86400) {
+            descEl.textContent = `Next shift in 1 day`;
         } else if (diffSec >= 3600) {
             const hours = Math.floor(diffSec / 3600);
             descEl.textContent = `Next shift in ${hours} hour${hours !== 1 ? "s" : ""}`;
