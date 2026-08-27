@@ -293,9 +293,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const si = document.createElement("div"); si.className = "agenda-shift-info";
             const tEl = document.createElement("div"); tEl.className = "agenda-time";
-            tEl.textContent = `${formatTime(shift.start, is24h)} \u2013 ${formatTime(shift.end, is24h)}`;
+            const timeSpan = document.createElement("span");
+            timeSpan.className = "agenda-time-range";
+            timeSpan.textContent = `${formatTime(shift.start, is24h)} \u2013 ${formatTime(shift.end, is24h)}`;
             const durEl = document.createElement("span"); durEl.className = "agenda-duration";
             durEl.textContent = calculateDuration(shift.start, shift.end);
+            tEl.appendChild(timeSpan);
             tEl.appendChild(durEl);
             const nEl = document.createElement("div"); nEl.className = "agenda-notes";
             nEl.textContent = shift.notes || "Shift";

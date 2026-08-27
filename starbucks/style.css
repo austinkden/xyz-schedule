@@ -99,6 +99,7 @@ body,
 .agenda-date-info,
 .agenda-details,
 .agenda-time,
+.agenda-time-range,
 .agenda-duration,
 .agenda-notes,
 .back-link,
@@ -513,19 +514,30 @@ body {
     font-weight: 600;
 }
 
-.time-row .detail-val,
-.time-row .detail-val * {
+.time-row .detail-val {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
     -webkit-user-select: text;
     user-select: text;
+}
+
+.time-row .detail-val * {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+#details-time {
+    white-space: nowrap;
 }
 
 .duration {
     color: var(--on-surface-variant);
     font-weight: 400;
     font-size: 0.85rem;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .note-val {
@@ -753,7 +765,7 @@ body {
     padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1rem;
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease;
     user-select: none;
@@ -774,9 +786,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 60px;
+    min-width: 56px;
     border-right: 1px solid var(--outline);
-    padding-right: 1rem;
+    padding-right: 0.85rem;
+    flex-shrink: 0;
 }
 
 .agenda-weekday {
@@ -792,13 +805,15 @@ body {
     font-weight: 700;
     color: var(--on-surface);
     margin-top: 2px;
+    white-space: nowrap;
 }
 
 .agenda-shift-info {
     flex-grow: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
 }
 
 .agenda-time {
@@ -807,22 +822,36 @@ body {
     color: var(--on-surface);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+    min-width: 0;
+}
+
+.agenda-time-range {
+    white-space: nowrap;
 }
 
 .agenda-duration {
     font-size: 0.7rem;
-    font-weight: 450;
+    font-weight: 500;
     color: var(--on-surface-variant);
     background: var(--surface-variant);
-    padding: 1px 6px;
+    padding: 1px 7px;
     border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.4;
 }
 
 .agenda-notes {
     font-size: 0.8rem;
     color: var(--on-surface-variant);
     font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .agenda-empty {
@@ -925,21 +954,26 @@ body {
     }
 
     .calendar-container {
-    padding: 40px 15px 30px;
+        padding: 20px 12px 30px;
         gap: 1rem;
     }
 
-    .brand h1 {
-        font-size: 1.5rem;
+    .portal-title {
+        font-size: 2.25rem;
     }
 
     .calendar-card {
-        padding: 1rem 0.5rem;
-        border-radius: 18px;
+        padding: 1rem 0.75rem;
+        border-radius: 20px;
     }
 
     .weekdays-grid div {
         font-size: 0.7rem;
+        padding: 0.35rem 0;
+    }
+
+    .days-grid {
+        gap: 0.3rem;
     }
 
     .day-cell {
@@ -954,14 +988,14 @@ body {
     }
 
     .shift-tag {
-        font-size: 0.5rem;
+        font-size: 0.55rem;
         padding: 1px 2px;
         letter-spacing: -0.02em;
     }
 
     .details-card {
         padding: 1.25rem 1rem;
-        border-radius: 18px;
+        border-radius: 20px;
     }
 
     .details-header h3 {
@@ -971,33 +1005,119 @@ body {
     .detail-row {
         font-size: 0.9rem;
     }
+
+    .detail-label {
+        width: 72px;
+        font-size: 0.8rem;
+    }
 }
 
 @media (max-width: 500px) {
-    .calendar-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 0.75rem;
+    .portal-title {
+        font-size: 1.85rem;
     }
 
-    .brand {
-        flex-direction: column;
-        text-align: center;
+    .calendar-controls-bar {
+        gap: 0.5rem;
     }
 
-    .header-right-controls {
-        width: 100%;
-        justify-content: space-between;
+    .navigation-controls {
+        height: 40px;
+        gap: 0.5rem;
+        padding: 0 0.35rem;
+    }
+
+    #current-month-year {
+        font-size: 0.92rem;
+        min-width: 95px;
+    }
+
+    .settings-toggle {
+        width: 40px;
+        height: 40px;
     }
 
     .settings-tray {
         border-radius: 12px;
         padding: 0.6rem 0.8rem;
     }
+
+    .settings-group {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .settings-label {
+        font-size: 0.7rem;
+    }
+
+    .toggle-option {
+        font-size: 0.68rem;
+        padding: 3px 10px;
+    }
+
+    .export-tray-btn {
+        font-size: 0.68rem;
+        padding: 4px 10px;
+    }
+
+    .agenda-item {
+        gap: 0.65rem;
+        padding: 0.6rem 0.65rem;
+    }
+
+    .agenda-date-info {
+        min-width: 48px;
+        padding-right: 0.6rem;
+    }
+
+    .agenda-weekday {
+        font-size: 0.65rem;
+    }
+
+    .agenda-day {
+        font-size: 0.78rem;
+    }
+
+    .agenda-time {
+        font-size: 0.82rem;
+        gap: 0.25rem 0.4rem;
+    }
+
+    .agenda-duration {
+        font-size: 0.68rem;
+        padding: 1px 6px;
+    }
+
+    .agenda-notes {
+        font-size: 0.75rem;
+    }
+
+    .countdown-badge {
+        font-size: 0.66rem;
+        padding: 2px 7px;
+    }
+
+    .detail-label {
+        width: 65px;
+        font-size: 0.78rem;
+    }
 }
 
 @media (max-width: 420px) {
+    .calendar-container {
+        padding: 15px 8px 25px;
+    }
+
+    .calendar-card {
+        padding: 0.85rem 0.5rem;
+        border-radius: 16px;
+    }
+
+    .days-grid {
+        gap: 0.2rem;
+    }
+
     .shift-tag {
         display: none !important;
     }
@@ -1006,30 +1126,60 @@ body {
         justify-content: center;
         align-items: center;
         aspect-ratio: 1;
-        padding: 0.25rem;
+        padding: 0.2rem;
+        border-radius: 6px;
     }
-
-    /* Shift dot removed per user request */
 
     .day-number {
         margin: 0;
+        font-size: 0.8rem;
+        width: 20px;
+        height: 20px;
     }
 
     .agenda-item {
-        gap: 0.75rem;
-        padding: 0.6rem 0.75rem;
+        gap: 0.5rem;
+        padding: 0.55rem 0.55rem;
+        border-radius: 10px;
     }
 
     .agenda-date-info {
-        min-width: 50px;
-        padding-right: 0.75rem;
+        min-width: 44px;
+        padding-right: 0.5rem;
+    }
+
+    .agenda-weekday {
+        font-size: 0.62rem;
     }
 
     .agenda-day {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
     }
 
     .agenda-time {
-        font-size: 0.8rem;
+        font-size: 0.78rem;
+    }
+
+    .agenda-duration {
+        font-size: 0.64rem;
+        padding: 1px 5px;
+    }
+
+    .agenda-notes {
+        font-size: 0.72rem;
+    }
+
+    .countdown-badge {
+        font-size: 0.62rem;
+        padding: 2px 6px;
+    }
+
+    .details-card {
+        padding: 1rem 0.75rem;
+        border-radius: 16px;
+    }
+
+    .details-header h3 {
+        font-size: 1rem;
     }
 }
