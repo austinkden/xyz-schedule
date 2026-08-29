@@ -111,7 +111,6 @@ body {
     height: 100%;
     object-fit: cover;
     user-select: none;
-    border-radius: 50%;
 }
 
 .pfp-icon-content {
@@ -121,7 +120,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 50%;
 }
 
 .pfp-icon-content svg {

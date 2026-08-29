@@ -1,0 +1,307 @@
+@import "../starbucks/style.css";
+
+/* Legend Bar */
+.event-legend-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    padding: 0.6rem 1.25rem;
+    margin-bottom: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--outline);
+    border-radius: 20px;
+    animation: slide-down 0.2s ease-out;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.dot-school { background: #3b82f6; }
+.dot-work { background: #22c55e; }
+.dot-busy { background: #f59e0b; }
+.dot-unavailable { background: #ef4444; }
+
+/* Day Cell Layout (Desktop): Increased vertical space to fit 3 events cleanly */
+.day-cell {
+    min-height: 94px;
+    aspect-ratio: auto;
+    padding: 6px 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 3px;
+    box-sizing: border-box;
+}
+
+.day-cell .day-number {
+    margin-bottom: 1px;
+    flex-shrink: 0;
+}
+
+.day-cell-spacer {
+    min-height: 94px;
+    aspect-ratio: auto;
+}
+
+/* Event Container & Chips (Desktop) */
+.day-events-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    margin-top: auto;
+}
+
+.shift-tag {
+    font-size: 0.65rem;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 2px 4px;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+    line-height: 1.35;
+    margin-top: 0;
+}
+
+.shift-tag.tag-school {
+    background: #1e3a8a;
+    color: #93c5fd;
+}
+:root.light-mode .shift-tag.tag-school {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.shift-tag.tag-work {
+    background: #14532d;
+    color: #86efac;
+}
+:root.light-mode .shift-tag.tag-work {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.shift-tag.tag-busy {
+    background: #78350f;
+    color: #fde68a;
+}
+:root.light-mode .shift-tag.tag-busy {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.shift-tag.tag-unavailable {
+    background: #7f1d1d;
+    color: #fca5a5;
+}
+:root.light-mode .shift-tag.tag-unavailable {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.shift-tag.tag-more {
+    background: var(--surface-variant);
+    color: var(--on-surface-variant);
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+/* Day Dots Container (Mobile indicator dots) */
+.day-dots-container {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    margin-top: 3px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.event-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* Event Detail Items in Details Panel */
+.availability-event-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--outline);
+}
+
+.availability-event-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.availability-event-item:first-child {
+    padding-top: 0;
+}
+
+.event-type-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.2rem;
+}
+
+.badge-school {
+    background: rgba(59, 130, 246, 0.18);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.badge-work {
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.badge-busy {
+    background: rgba(245, 158, 11, 0.18);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.badge-unavailable {
+    background: rgba(239, 68, 68, 0.18);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+/* Agenda View Typography: Labels bold, times regular */
+.agenda-time {
+    font-weight: 400;
+}
+
+.agenda-time-range {
+    font-weight: 400;
+}
+
+.agenda-event-label {
+    font-weight: 700;
+    color: var(--on-surface);
+}
+
+.agenda-event-time-val {
+    font-weight: 400;
+    color: var(--on-surface-variant);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .event-legend-bar {
+        gap: 0.75rem;
+        padding: 0.5rem 0.75rem;
+    }
+    .legend-item {
+        font-size: 0.75rem;
+    }
+}
+
+/* Mobile View (<= 600px): Hide text tags and show respective colored dots instead */
+@media (max-width: 600px) {
+    .day-events-container {
+        display: none !important;
+    }
+
+    .day-dots-container {
+        display: flex;
+    }
+
+    .day-cell {
+        min-height: auto;
+        aspect-ratio: 1;
+        justify-content: center;
+        align-items: center;
+        padding: 0.25rem;
+        border-radius: 8px;
+    }
+
+    .day-cell-spacer {
+        min-height: auto;
+        aspect-ratio: 1;
+    }
+
+    .day-number {
+        margin: 0;
+        font-size: 0.82rem;
+        width: 22px;
+        height: 22px;
+    }
+
+    .event-legend-bar {
+        gap: 0.5rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .legend-item {
+        font-size: 0.7rem;
+        gap: 4px;
+    }
+
+    .legend-dot {
+        width: 7px;
+        height: 7px;
+    }
+}
+
+@media (max-width: 420px) {
+    .day-cell {
+        padding: 0.2rem;
+        border-radius: 6px;
+    }
+
+    .day-number {
+        font-size: 0.78rem;
+        width: 20px;
+        height: 20px;
+    }
+
+    .event-dot {
+        width: 4.5px;
+        height: 4.5px;
+    }
+
+    .day-dots-container {
+        gap: 2.5px;
+        margin-top: 2px;
+    }
+
+    .event-type-badge {
+        font-size: 0.65rem;
+        padding: 1px 6px;
+    }
+}
