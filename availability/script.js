@@ -26,7 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const detailsCountdown = document.getElementById("details-countdown");
     const detailsEventsList = document.getElementById("details-events-list");
 
-    let currentDate = new Date();
+    const todayReal = new Date();
+    const minYear = todayReal.getFullYear();
+    const minMonth = todayReal.getMonth(); // Current month
+    const maxDateLimit = new Date(minYear, minMonth + 1, 1);
+    const maxYear = maxDateLimit.getFullYear();
+    const maxMonth = maxDateLimit.getMonth(); // Current month + 1
+
+    let currentDate = new Date(minYear, minMonth, 1);
     let selectedDateStr = null;
     let currentView = "month";
     let timeFormat = localStorage.getItem("time-format-pref") || "12h";
@@ -466,10 +473,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function updateMonthNavBounds() {
+        const curY = currentDate.getFullYear();
+        const curM = currentDate.getMonth();
+
+        const isAtMin = (curY < minYear) || (curY === minYear && curM <= minMonth);
+        const isAtMax = (curY > maxYear) || (curY === maxYear && curM >= maxMonth);
+
+        if (prevMonthBtn) {
+            prevMonthBtn.disabled = isAtMin;
+            prevMonthBtn.classList.toggle("disabled", isAtMin);
+            prevMonthBtn.style.opacity = isAtMin ? "0.25" : "1";
+            prevMonthBtn.style.cursor = isAtMin ? "not-allowed" : "pointer";
+            prevMonthBtn.style.pointerEvents = isAtMin ? "none" : "auto";
+        }
+
+        if (nextMonthBtn) {
+            nextMonthBtn.disabled = isAtMax;
+            nextMonthBtn.classList.toggle("disabled", isAtMax);
+            nextMonthBtn.style.opacity = isAtMax ? "0.25" : "1";
+            nextMonthBtn.style.cursor = isAtMax ? "not-allowed" : "pointer";
+            nextMonthBtn.style.pointerEvents = isAtMax ? "none" : "auto";
+        }
+    }
+
     function renderAll() {
         if (currentMonthYearHeader) {
             currentMonthYearHeader.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
         }
+        updateMonthNavBounds();
         renderWeekdayHeader();
         renderMonthSummary();
         if (currentView === "month") {
@@ -622,6 +654,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Event Listeners
     if (prevMonthBtn) {
         prevMonthBtn.addEventListener("click", () => {
+            const curY = currentDate.getFullYear();
+            const curM = currentDate.getMonth();
+            if ((curY < minYear) || (curY === minYear && curM <= minMonth)) {
+                return;
+            }
             currentDate.setMonth(currentDate.getMonth() - 1);
             renderAll();
             syncCalendarAvailability(currentDate);
@@ -630,6 +667,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (nextMonthBtn) {
         nextMonthBtn.addEventListener("click", () => {
+            const curY = currentDate.getFullYear();
+            const curM = currentDate.getMonth();
+            if ((curY > maxYear) || (curY === maxYear && curM >= maxMonth)) {
+                return;
+            }
             currentDate.setMonth(currentDate.getMonth() + 1);
             renderAll();
             syncCalendarAvailability(currentDate);
