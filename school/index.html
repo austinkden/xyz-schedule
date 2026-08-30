@@ -13,7 +13,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Schedule - Austin Strong</title>
+    <title>School Classes - Austin Strong</title>
     <meta name="description" content="View my high school class schedule across both semesters.">
     <link rel="icon" href="/assets/images/pfp-nine-sided-cookie.png" type="image/png">
     <link rel="shortcut icon" href="/assets/images/pfp-nine-sided-cookie.png" type="image/png">
@@ -23,7 +23,7 @@
     <!-- Discord & Open Graph Meta Tags -->
     <meta name="theme-color" content="#121016">
     <meta property="og:site_name" content="Austin Strong">
-    <meta property="og:title" content="Austin Strong - School Schedule">
+    <meta property="og:title" content="Austin Strong - School Classes">
     <meta property="og:description" content="View my high school class schedule across both semesters.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://astrong.xyz/schedule/school/">
@@ -32,7 +32,7 @@
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Austin Strong - School Schedule">
+    <meta name="twitter:title" content="Austin Strong - School Classes">
     <meta name="twitter:description" content="View my high school class schedule across both semesters.">
     <meta name="twitter:image" content="https://astrong.xyz/assets/images/pfp-nine-sided-cookie.png">
 
@@ -91,7 +91,7 @@
 
         <header class="portal-header">
             <!-- Named portal-title to prevent script.js H1 query overrides -->
-            <div class="portal-title">School Schedule</div>
+            <div class="portal-title">School Classes</div>
         </header>
 
         <!-- Always-Visible Semester Toggle -->
@@ -101,14 +101,159 @@
         </div>
 
         <!-- Schedule Grid Container -->
-        <main id="schedule-grid" class="schedule-grid">
-            <!-- Class cards populated dynamically by script.js -->
+        <main id="schedule-grid" class="schedule-grid-wrapper">
+            <!-- Semester 1 Classes (Hard-coded) -->
+            <div id="semester-1-grid" class="schedule-grid">
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P1</div>
+                        <div class="class-info">
+                            <div class="class-name">Mindfulness</div>
+                            <div class="class-teacher">Cari Risby</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">U508</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P2</div>
+                        <div class="class-info">
+                            <div class="class-name">Physics</div>
+                            <div class="class-teacher">Mark McConnell</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">L417</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P3</div>
+                        <div class="class-info">
+                            <div class="class-name">Intro to AI</div>
+                            <div class="class-teacher">Jason Cochrane</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">L528</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P4</div>
+                        <div class="class-info">
+                            <div class="class-name">ACC US History</div>
+                            <div class="class-teacher">Kelly Hale</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">L508</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P5</div>
+                        <div class="class-info">
+                            <div class="class-name">Trigonometry / Pre-Calc</div>
+                            <div class="class-teacher">Jenny Jones</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">L405</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P6</div>
+                        <div class="class-info">
+                            <div class="class-name">AP Cybersecurity</div>
+                            <div class="class-teacher">Jason Cochrane</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">L528</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P7</div>
+                        <div class="class-info">
+                            <div class="class-name">English 3</div>
+                            <div class="class-teacher">Becky Garrett</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">U318</div>
+                </div>
+            </div>
+
+            <!-- Semester 2 Classes (Hard-coded) -->
+            <div id="semester-2-grid" class="schedule-grid" style="display: none;">
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P1</div>
+                        <div class="class-info">
+                            <div class="class-name">Physics</div>
+                            <div class="class-teacher">Mark McConnell</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">L417</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P2</div>
+                        <div class="class-info">
+                            <div class="class-name">Aquatic Biology</div>
+                            <div class="class-teacher">Brad Shores</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">U413</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P3</div>
+                        <div class="class-info">
+                            <div class="class-name">Criminal Justice</div>
+                            <div class="class-teacher">Jaclyn Ekhoff</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">U505</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P4</div>
+                        <div class="class-info">
+                            <div class="class-name">ACC US History</div>
+                            <div class="class-teacher">Adam Woody</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">L511</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P5</div>
+                        <div class="class-info">
+                            <div class="class-name">Trigonometry / Pre-Calc</div>
+                            <div class="class-teacher">Jenny Jones</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">L405</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P6</div>
+                        <div class="class-info">
+                            <div class="class-name">AP Cybersecurity</div>
+                            <div class="class-teacher">Jason Cochrane</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">L528</div>
+                </div>
+                <div class="class-card">
+                    <div class="class-left">
+                        <div class="period-badge">P7</div>
+                        <div class="class-info">
+                            <div class="class-name">English 3</div>
+                            <div class="class-teacher">Becky Garrett</div>
+                        </div>
+                    </div>
+                    <div class="class-room-badge">U318</div>
+                </div>
+            </div>
         </main>
     </div>
 
     <!-- Scripts -->
     <script src="/universal.js" defer></script>
-    <script src="schedule.js" defer></script>
     <script src="script.js" defer></script>
 </body>
 
