@@ -6,29 +6,40 @@
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 1.25rem;
-    padding: 0.6rem 1.25rem;
+    gap: 0.65rem 1rem;
+    padding: 0.75rem 1.25rem;
     margin-bottom: 0.75rem;
     background: var(--surface);
     border: 1px solid var(--outline);
-    border-radius: 20px;
+    border-radius: 14px;
     animation: slide-down 0.2s ease-out;
 }
 
 .legend-item {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
+    gap: 8px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    background: var(--surface-variant, rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--outline, rgba(255, 255, 255, 0.08));
+    font-size: 0.82rem;
     font-weight: 600;
-    color: var(--on-surface-variant);
+    color: var(--on-surface);
     user-select: none;
     -webkit-user-select: none;
+    transition: background-color 0.15s ease;
+}
+
+:root.light-mode .legend-item {
+    background: #f4f2f7;
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #1d1b20;
 }
 
 .legend-dot {
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     display: inline-block;
     flex-shrink: 0;
@@ -38,6 +49,16 @@
 .dot-work { background: #22c55e; }
 .dot-busy { background: #f59e0b; }
 .dot-unavailable { background: #ef4444; }
+
+/* Override Starbucks month header clickability on availability calendar */
+#current-month-year {
+    cursor: default !important;
+    pointer-events: none !important;
+}
+
+#current-month-year:hover {
+    color: inherit !important;
+}
 
 /* Day Cell Layout (Desktop): Increased vertical space to fit 3 events cleanly */
 .day-cell {
@@ -263,18 +284,23 @@
     }
 
     .event-legend-bar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
         gap: 0.5rem;
-        padding: 0.4rem 0.6rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 12px;
     }
 
     .legend-item {
-        font-size: 0.7rem;
-        gap: 4px;
+        justify-content: center;
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        gap: 6px;
     }
 
     .legend-dot {
-        width: 7px;
-        height: 7px;
+        width: 8px;
+        height: 8px;
     }
 }
 

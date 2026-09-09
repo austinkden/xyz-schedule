@@ -232,12 +232,6 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <span class="duration">${durationText}</span>
                             </div>
                         </div>
-                        ${ev.notes ? `
-                            <div class="detail-row">
-                                <span class="detail-label">Notes</span>
-                                <span class="detail-val note-val">${ev.notes}</span>
-                            </div>
-                        ` : ""}
                     </div>
                 `;
             }
@@ -446,12 +440,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 tEl.appendChild(timeSpan);
                 tEl.appendChild(durEl);
                 si.appendChild(tEl);
-
-                if (ev.notes) {
-                    const nEl = document.createElement("div"); nEl.className = "agenda-notes";
-                    nEl.textContent = ev.notes;
-                    si.appendChild(nEl);
-                }
             }
             item.appendChild(si);
 
@@ -530,20 +518,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 continue;
             }
 
-            let startDateObj, endDateObj;
-            let isAllDay = false;
-            let dateKey = "";
+            const isAllDayRange = Boolean(item.start && item.start.date);
+            let sDate, eDate;
 
             if (item.start && item.start.dateTime) {
-                startDateObj = new Date(item.start.dateTime);
-                endDateObj = new Date(item.end.dateTime);
-                dateKey = formatDateKey(startDateObj.getFullYear(), startDateObj.getMonth(), startDateObj.getDate());
+                sDate = new Date(item.start.dateTime);
+                eDate = new Date(item.end ? item.end.dateTime : item.start.dateTime);
             } else if (item.start && item.start.date) {
-                isAllDay = true;
-                dateKey = item.start.date;
                 const [sy, sm, sd] = item.start.date.split("-").map(Number);
-                startDateObj = new Date(sy, sm - 1, sd, 0, 0, 0);
-                endDateObj = new Date(sy, sm - 1, sd, 23, 59, 59);
+                sDate = new Date(sy, sm - 1, sd, 0, 0, 0);
+                if (item.end && item.end.date) {
+                    const [ey, em, ed] = item.end.date.split("-").map(Number);
+                    eDate = new Date(ey, em - 1, ed, 0, 0, 0);
+                } else {
+                    eDate = new Date(sy, sm - 1, sd + 1, 0, 0, 0);
+                }
             } else {
                 continue;
             }
@@ -571,25 +560,77 @@ document.addEventListener("DOMContentLoaded", () => {
                 label = "Busy";
             }
 
-            const startTimeStr = isAllDay ? "00:00" : `${pad(startDateObj.getHours())}:${pad(startDateObj.getMinutes())}`;
-            const endTimeStr = isAllDay ? "23:59" : `${pad(endDateObj.getHours())}:${pad(endDateObj.getMinutes())}`;
+            if (isAllDayRange) {
+                const cur = new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate(), 12, 0, 0);
+                const limit = new Date(eDate.getFullYear(), eDate.getMonth(), eDate.getDate(), 12, 0, 0);
 
-            const eventObj = {
-                type,
-                label,
-                title: item.summary || label,
-                notes: item.description || "",
-                start: startTimeStr,
-                end: endTimeStr,
-                isAllDay,
-                startDate: startDateObj.toISOString(),
-                endDate: endDateObj.toISOString()
-            };
+                while (cur < limit) {
+                    const dKey = formatDateKey(cur.getFullYear(), cur.getMonth(), cur.getDate());
+                    const eventObj = {
+                        type,
+                        label,
+                        title: item.summary || label,
+                        notes: item.description || "",
+                        start: "00:00",
+                        end: "23:59",
+                        isAllDay: true,
+                        startDate: sDate.toISOString(),
+                        endDate: eDate.toISOString()
+                    };
+                    if (!scheduleMap[dKey]) scheduleMap[dKey] = [];
+                    scheduleMap[dKey].push(eventObj);
+                    cur.setDate(cur.getDate() + 1);
+                }
+            } else {
+                const sDay = new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate(), 12, 0, 0);
+                const eDay = new Date(eDate.getFullYear(), eDate.getMonth(), eDate.getDate(), 12, 0, 0);
 
-            if (!scheduleMap[dateKey]) {
-                scheduleMap[dateKey] = [];
+                if (sDay.getTime() === eDay.getTime()) {
+                    const dKey = formatDateKey(sDate.getFullYear(), sDate.getMonth(), sDate.getDate());
+                    const eventObj = {
+                        type,
+                        label,
+                        title: item.summary || label,
+                        notes: item.description || "",
+                        start: `${pad(sDate.getHours())}:${pad(sDate.getMinutes())}`,
+                        end: `${pad(eDate.getHours())}:${pad(eDate.getMinutes())}`,
+                        isAllDay: false,
+                        startDate: sDate.toISOString(),
+                        endDate: eDate.toISOString()
+                    };
+                    if (!scheduleMap[dKey]) scheduleMap[dKey] = [];
+                    scheduleMap[dKey].push(eventObj);
+                } else {
+                    const cur = new Date(sDay);
+                    while (cur <= eDay) {
+                        const isFirstDay = cur.getTime() === sDay.getTime();
+                        const isLastDay = cur.getTime() === eDay.getTime();
+                        const dKey = formatDateKey(cur.getFullYear(), cur.getMonth(), cur.getDate());
+
+                        if (isLastDay && eDate.getHours() === 0 && eDate.getMinutes() === 0) {
+                            cur.setDate(cur.getDate() + 1);
+                            continue;
+                        }
+
+                        const startTimeStr = isFirstDay ? `${pad(sDate.getHours())}:${pad(sDate.getMinutes())}` : "00:00";
+                        const endTimeStr = isLastDay ? `${pad(eDate.getHours())}:${pad(eDate.getMinutes())}` : "23:59";
+                        const eventObj = {
+                            type,
+                            label,
+                            title: item.summary || label,
+                            notes: item.description || "",
+                            start: startTimeStr,
+                            end: endTimeStr,
+                            isAllDay: !isFirstDay && !isLastDay,
+                            startDate: sDate.toISOString(),
+                            endDate: eDate.toISOString()
+                        };
+                        if (!scheduleMap[dKey]) scheduleMap[dKey] = [];
+                        scheduleMap[dKey].push(eventObj);
+                        cur.setDate(cur.getDate() + 1);
+                    }
+                }
             }
-            scheduleMap[dateKey].push(eventObj);
         }
 
         return scheduleMap;
