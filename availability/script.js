@@ -33,12 +33,97 @@ document.addEventListener("DOMContentLoaded", () => {
     const maxYear = maxDateLimit.getFullYear();
     const maxMonth = maxDateLimit.getMonth(); // Current month + 1
 
+    // Browser Storage & Cookie Helpers for Calendar Settings Persistence
+    function getCookie(name) {
+        try {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        } catch (e) {}
+        return null;
+    }
+
+    function setCookie(name, val) {
+        try {
+            const hostname = window.location.hostname;
+            const domainStr = hostname.endsWith('astrong.xyz') ? '; domain=.astrong.xyz' : '';
+            const secureStr = window.location.protocol === 'https:' ? '; Secure' : '';
+            document.cookie = `${name}=${encodeURIComponent(val)}; path=/; max-age=31536000; SameSite=Lax${secureStr}${domainStr}`;
+        } catch (e) {}
+    }
+
+    function getStoredSetting(key, fallback) {
+        const cookieVal = getCookie(key);
+        if (cookieVal !== null && cookieVal !== undefined && cookieVal !== '') {
+            try {
+                return decodeURIComponent(cookieVal);
+            } catch (e) {
+                return cookieVal;
+            }
+        }
+        try {
+            const localVal = localStorage.getItem(key);
+            if (localVal !== null && localVal !== undefined) {
+                return localVal;
+            }
+        } catch (e) {}
+        return fallback;
+    }
+
+    function setStoredSetting(key, val) {
+        const strVal = String(val);
+        try {
+            localStorage.setItem(key, strVal);
+        } catch (e) {}
+        setCookie(key, strVal);
+    }
+
+    function getStoredTimeFormat() {
+        const pref = getStoredSetting("time-format-pref", null);
+        if (pref === "12h" || pref === "24h") return pref;
+        const time24 = getStoredSetting("time-format-24h", null);
+        if (time24 !== null) return time24 === "true" ? "24h" : "12h";
+        return "12h";
+    }
+
+    function saveTimeFormat(val) {
+        setStoredSetting("time-format-pref", val);
+        setStoredSetting("time-format-24h", val === "24h" ? "true" : "false");
+    }
+
+    function getStoredWeekStart() {
+        const pref = getStoredSetting("week-start-pref", "sun");
+        return pref === "mon" ? "mon" : "sun";
+    }
+
+    function saveWeekStart(val) {
+        setStoredSetting("week-start-pref", val);
+    }
+
+    function getStoredAdjacentDays() {
+        const pref = getStoredSetting("show-adjacent-pref", "true");
+        return pref !== "false";
+    }
+
+    function saveAdjacentDays(val) {
+        setStoredSetting("show-adjacent-pref", val ? "true" : "false");
+    }
+
+    function getStoredView() {
+        const pref = getStoredSetting("calendar-view-pref", "month");
+        return pref === "agenda" ? "agenda" : "month";
+    }
+
+    function saveView(val) {
+        setStoredSetting("calendar-view-pref", val);
+    }
+
     let currentDate = new Date(minYear, minMonth, 1);
     let selectedDateStr = null;
-    let currentView = "month";
-    let timeFormat = localStorage.getItem("time-format-pref") || "12h";
-    let weekStart = localStorage.getItem("week-start-pref") || "sun";
-    let showAdjacentDays = localStorage.getItem("show-adjacent-pref") !== "false";
+    let currentView = getStoredView();
+    let timeFormat = getStoredTimeFormat();
+    let weekStart = getStoredWeekStart();
+    let showAdjacentDays = getStoredAdjacentDays();
 
     // Global in-memory schedule map: dateKey "YYYY-MM-DD" -> array of events
     let AVAILABILITY_SCHEDULE = {};
@@ -722,6 +807,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnViewMonth && btnViewAgenda) {
         btnViewMonth.addEventListener("click", () => {
             currentView = "month";
+            saveView("month");
             btnViewMonth.classList.add("active");
             btnViewAgenda.classList.remove("active");
             btnViewMonth.closest('.view-switcher')?.setAttribute('data-active', '0');
@@ -730,6 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         btnViewAgenda.addEventListener("click", () => {
             currentView = "agenda";
+            saveView("agenda");
             btnViewAgenda.classList.add("active");
             btnViewMonth.classList.remove("active");
             btnViewAgenda.closest('.view-switcher')?.setAttribute('data-active', '1');
@@ -747,7 +834,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnFormat12h && btnFormat24h) {
         btnFormat12h.addEventListener("click", () => {
             timeFormat = "12h";
-            localStorage.setItem("time-format-pref", "12h");
+            saveTimeFormat("12h");
             btnFormat12h.classList.add("active");
             btnFormat24h.classList.remove("active");
             btnFormat12h.closest('.toggle-group')?.setAttribute('data-active', '0');
@@ -756,7 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         btnFormat24h.addEventListener("click", () => {
             timeFormat = "24h";
-            localStorage.setItem("time-format-pref", "24h");
+            saveTimeFormat("24h");
             btnFormat24h.classList.add("active");
             btnFormat12h.classList.remove("active");
             btnFormat24h.closest('.toggle-group')?.setAttribute('data-active', '1');
@@ -767,7 +854,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnWeekSun && btnWeekMon) {
         btnWeekSun.addEventListener("click", () => {
             weekStart = "sun";
-            localStorage.setItem("week-start-pref", "sun");
+            saveWeekStart("sun");
             btnWeekSun.classList.add("active");
             btnWeekMon.classList.remove("active");
             btnWeekSun.closest('.toggle-group')?.setAttribute('data-active', '0');
@@ -776,7 +863,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         btnWeekMon.addEventListener("click", () => {
             weekStart = "mon";
-            localStorage.setItem("week-start-pref", "mon");
+            saveWeekStart("mon");
             btnWeekMon.classList.add("active");
             btnWeekSun.classList.remove("active");
             btnWeekMon.closest('.toggle-group')?.setAttribute('data-active', '1');
@@ -787,7 +874,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnAdjacentOn && btnAdjacentOff) {
         btnAdjacentOn.addEventListener("click", () => {
             showAdjacentDays = true;
-            localStorage.setItem("show-adjacent-pref", "true");
+            saveAdjacentDays(true);
             btnAdjacentOn.classList.add("active");
             btnAdjacentOff.classList.remove("active");
             btnAdjacentOn.closest('.toggle-group')?.setAttribute('data-active', '0');
@@ -796,7 +883,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         btnAdjacentOff.addEventListener("click", () => {
             showAdjacentDays = false;
-            localStorage.setItem("show-adjacent-pref", "false");
+            saveAdjacentDays(false);
             btnAdjacentOff.classList.add("active");
             btnAdjacentOn.classList.remove("active");
             btnAdjacentOff.closest('.toggle-group')?.setAttribute('data-active', '1');
@@ -848,6 +935,8 @@ document.addEventListener("DOMContentLoaded", () => {
         btnAdjacentOn.closest('.toggle-group')?.setAttribute('data-active', showAdjacentDays ? "0" : "1");
     }
     if (btnViewMonth && btnViewAgenda) {
+        btnViewMonth.classList.toggle("active", currentView === "month");
+        btnViewAgenda.classList.toggle("active", currentView === "agenda");
         btnViewMonth.closest('.view-switcher')?.setAttribute('data-active', currentView === "month" ? "0" : "1");
     }
 

@@ -29,12 +29,97 @@ document.addEventListener("DOMContentLoaded", () => {
     const detailsNotes = document.getElementById("details-notes");
     const detailsNotesRow = document.getElementById("details-notes-row");
 
+    // Browser Storage & Cookie Helpers for Calendar Settings Persistence
+    function getCookie(name) {
+        try {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        } catch (e) {}
+        return null;
+    }
+
+    function setCookie(name, val) {
+        try {
+            const hostname = window.location.hostname;
+            const domainStr = hostname.endsWith('astrong.xyz') ? '; domain=.astrong.xyz' : '';
+            const secureStr = window.location.protocol === 'https:' ? '; Secure' : '';
+            document.cookie = `${name}=${encodeURIComponent(val)}; path=/; max-age=31536000; SameSite=Lax${secureStr}${domainStr}`;
+        } catch (e) {}
+    }
+
+    function getStoredSetting(key, fallback) {
+        const cookieVal = getCookie(key);
+        if (cookieVal !== null && cookieVal !== undefined && cookieVal !== '') {
+            try {
+                return decodeURIComponent(cookieVal);
+            } catch (e) {
+                return cookieVal;
+            }
+        }
+        try {
+            const localVal = localStorage.getItem(key);
+            if (localVal !== null && localVal !== undefined) {
+                return localVal;
+            }
+        } catch (e) {}
+        return fallback;
+    }
+
+    function setStoredSetting(key, val) {
+        const strVal = String(val);
+        try {
+            localStorage.setItem(key, strVal);
+        } catch (e) {}
+        setCookie(key, strVal);
+    }
+
+    function getStoredTimeFormat() {
+        const pref = getStoredSetting("time-format-pref", null);
+        if (pref === "12h" || pref === "24h") return pref;
+        const time24 = getStoredSetting("time-format-24h", null);
+        if (time24 !== null) return time24 === "true" ? "24h" : "12h";
+        return "12h";
+    }
+
+    function saveTimeFormat(val) {
+        setStoredSetting("time-format-pref", val);
+        setStoredSetting("time-format-24h", val === "24h" ? "true" : "false");
+    }
+
+    function getStoredWeekStart() {
+        const pref = getStoredSetting("week-start-pref", "sun");
+        return pref === "mon" ? "mon" : "sun";
+    }
+
+    function saveWeekStart(val) {
+        setStoredSetting("week-start-pref", val);
+    }
+
+    function getStoredAdjacentDays() {
+        const pref = getStoredSetting("show-adjacent-pref", "true");
+        return pref !== "false";
+    }
+
+    function saveAdjacentDays(val) {
+        setStoredSetting("show-adjacent-pref", val ? "true" : "false");
+    }
+
+    function getStoredView() {
+        const pref = getStoredSetting("calendar-view-pref", "month");
+        return pref === "agenda" ? "agenda" : "month";
+    }
+
+    function saveView(val) {
+        setStoredSetting("calendar-view-pref", val);
+    }
+
     let currentDate = new Date();
     let selectedDateStr = null;
-    let currentView = "month";
-    let timeFormat = localStorage.getItem("time-format-pref") || "12h";
-    let weekStart = localStorage.getItem("week-start-pref") || "sun";
-    let showAdjacentDays = localStorage.getItem("show-adjacent-pref") !== "false";
+    let currentView = getStoredView();
+    let timeFormat = getStoredTimeFormat();
+    let weekStart = getStoredWeekStart();
+    let showAdjacentDays = getStoredAdjacentDays();
 
 
     const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -341,21 +426,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setTimeFormat(f) {
-        timeFormat = f; localStorage.setItem("time-format-pref", f);
+        timeFormat = f;
+        saveTimeFormat(f);
         btnFormat12h.classList.toggle("active", f === "12h");
         btnFormat24h.classList.toggle("active", f === "24h");
         btnFormat12h.closest('.toggle-group')?.setAttribute('data-active', f === "12h" ? "0" : "1");
         renderAll();
     }
     function setWeekStart(v) {
-        weekStart = v; localStorage.setItem("week-start-pref", v);
+        weekStart = v;
+        saveWeekStart(v);
         btnWeekSun.classList.toggle("active", v === "sun");
         btnWeekMon.classList.toggle("active", v === "mon");
         btnWeekSun.closest('.toggle-group')?.setAttribute('data-active', v === "sun" ? "0" : "1");
         renderAll();
     }
     function setAdjacentDays(v) {
-        showAdjacentDays = v; localStorage.setItem("show-adjacent-pref", String(v));
+        showAdjacentDays = v;
+        saveAdjacentDays(v);
         btnAdjacentOn.classList.toggle("active", v);
         btnAdjacentOff.classList.toggle("active", !v);
         btnAdjacentOn.closest('.toggle-group')?.setAttribute('data-active', v ? "0" : "1");
@@ -364,6 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setView(view) {
         currentView = view;
+        saveView(view);
         btnViewMonth.classList.toggle("active", view === "month");
         btnViewAgenda.classList.toggle("active", view === "agenda");
         btnViewMonth.closest('.view-switcher')?.setAttribute('data-active', view === "month" ? "0" : "1");
@@ -422,7 +511,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnAdjacentOff.addEventListener("click", () => setAdjacentDays(false));
 
 
-    // Init UI state from localStorage (single render)
+    // Init UI state from storage/cookies (single render)
     btnFormat12h.classList.toggle("active", timeFormat === "12h");
     btnFormat24h.classList.toggle("active", timeFormat === "24h");
     btnFormat12h.closest('.toggle-group')?.setAttribute('data-active', timeFormat === "12h" ? "0" : "1");
@@ -432,6 +521,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btnAdjacentOn.classList.toggle("active", showAdjacentDays);
     btnAdjacentOff.classList.toggle("active", !showAdjacentDays);
     btnAdjacentOn.closest('.toggle-group')?.setAttribute('data-active', showAdjacentDays ? "0" : "1");
+    btnViewMonth.classList.toggle("active", currentView === "month");
+    btnViewAgenda.classList.toggle("active", currentView === "agenda");
     btnViewMonth.closest('.view-switcher')?.setAttribute('data-active', currentView === "month" ? "0" : "1");
 
     renderAll();
