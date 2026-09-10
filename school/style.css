@@ -2,14 +2,17 @@
 
 /* Base reset and design tokens matching astrong.xyz minimalist theme */
 :root {
-    --bg-color: #121212;
+    --bg-color: #121016;
     --surface-color: #1d1b20;
-    --surface-variant: #2d2a33;
-    --outline-color: #49454f;
+    --surface-variant: #28252e;
+    --outline-color: #35333a;
+    --outline-light: #49454f;
     --text-primary: #e6e1e5;
     --text-secondary: #cac4d0;
     --accent-color: #8859ff;
     --accent-light: #f2edff;
+    --primary-container: #261947;
+    --on-primary-container: #e8ddff;
     --error-color: #ff5252;
 }
 
@@ -17,11 +20,14 @@
     --bg-color: #fdfbff;
     --surface-color: #f5f2fa;
     --surface-variant: #e7e0ec;
-    --outline-color: #79747e;
+    --outline-color: #dcd7e2;
+    --outline-light: #79747e;
     --text-primary: #1d1b20;
     --text-secondary: #49454f;
     --accent-color: #8859ff;
     --accent-light: #f2edff;
+    --primary-container: #ede7f6;
+    --on-primary-container: #5b2ee0;
     --error-color: #d32f2f;
 }
 
@@ -30,8 +36,33 @@
     margin: 0;
     padding: 0;
     font-family: 'Google Sans Flex', 'Google Sans', sans-serif;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--text-primary) 18%, transparent) transparent;
 }
 
+/* Custom Scrollbars matching repository standards */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--text-primary) 18%, transparent);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+}
+
+/* Repository-wide text selection standard */
 ::selection {
     background-color: var(--accent-light);
     color: var(--accent-color);
@@ -50,23 +81,34 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0; margin: 0;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    overflow-x: hidden;
 }
 
-/* Header & Portal Container */
-.portal-container {
-    padding: 40px 15px 30px;
-    width: 100%;
-    max-width: 800px;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+/* Selection restrictions on interactive elements */
+.back-link,
+.pfp-wrapper,
+.portal-title,
+.portal-subtitle,
+.meta-badge,
+.semester-toggle-container,
+.semester-btn,
+.period-badge,
+.class-room-badge,
+button,
+svg {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
+/* Back Link */
 .back-link {
     position: absolute;
-    top: 75px;
-    left: 30px;
+    top: calc(var(--astrong-header-height, 61.6px) + var(--astrong-header-spacing, 17.2px));
+    left: var(--astrong-header-left, 1.5rem);
     z-index: 1000;
     display: inline-flex;
     align-items: center;
@@ -76,258 +118,325 @@ body {
     font-size: 0.95rem;
     font-weight: 500;
     transition: color 0.15s ease;
-    user-select: none;
-    -webkit-user-select: none;
 }
 
 .back-link:hover {
     color: var(--text-primary);
 }
 
+/* Cookie Icon Container */
+.pfp-wrapper {
+    margin-top: 40px;
+    margin-bottom: -10px;
+    width: clamp(80px, 8vw, 100px);
+    height: clamp(80px, 8vw, 100px);
+    clip-path: url('#active-clip');
+    -webkit-clip-path: url('#active-clip');
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.pfp-icon-content {
+    width: 100%;
+    height: 100%;
+    background: var(--primary-container);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pfp-icon-content svg {
+    width: 44%;
+    height: 44%;
+    color: var(--on-primary-container, #ffffff);
+}
+
+/* Portal Container */
+.portal-container {
+    padding: 30px 20px 50px;
+    width: 100%;
+    max-width: 780px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Portal Header */
 .portal-header {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 /* Named portal-title to prevent root script.js H1 query overrides */
 .portal-title {
     font-size: 2.25rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     color: var(--text-primary);
-    user-select: none;
-    -webkit-user-select: none;
 }
 
 .portal-subtitle {
     font-size: 1rem;
     color: var(--text-secondary);
+    font-weight: 400;
 }
 
-/* Always-Visible Semester Toggle Bar */
-.semester-toggle-container {
+.header-badges {
     display: flex;
     align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+}
+
+.meta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     background-color: var(--surface-color);
     border: 1px solid var(--outline-color);
-    border-radius: 12px;
+    color: var(--text-secondary);
+    padding: 0.32rem 0.8rem;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.meta-badge svg {
+    color: var(--accent-color);
+}
+
+/* Centered Pill Semester Toggle Container */
+.semester-toggle-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--surface-variant);
+    border: 1px solid var(--outline-color);
+    border-radius: 9999px;
     padding: 4px;
-    gap: 4px;
-    user-select: none;
-    -webkit-user-select: none;
+    width: 100%;
+    max-width: 330px;
+    margin: 0.25rem auto 1rem;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+/* Glider Background Pill matching calendar settings toggle bouncy transition */
+.semester-toggle-container::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    border-radius: 9999px;
+    background-color: var(--accent-color, #8859ff);
+    pointer-events: none;
+    z-index: 1;
+    transform: translateX(0);
+    transition: transform 0.35s cubic-bezier(0.34, 1.15, 0.64, 1);
+}
+
+.semester-toggle-container[data-active="1"]::before {
+    transform: translateX(100%);
 }
 
 .semester-btn {
+    position: relative;
+    z-index: 2;
     flex: 1;
-    background: transparent;
+    background: transparent !important;
     border: none;
     color: var(--text-secondary);
-    padding: 0.65rem 1rem;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    padding: 0.62rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.92rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: color 0.2s ease;
     text-align: center;
-    user-select: none;
-    -webkit-user-select: none;
 }
 
 .semester-btn:hover {
     color: var(--text-primary);
-    background-color: var(--surface-variant);
 }
 
-.semester-btn.active {
-    background-color: var(--accent-color);
+.semester-btn.active,
+.semester-btn.active:hover {
     color: #ffffff;
 }
 
 /* Schedule Card Grid */
+.schedule-grid-wrapper {
+    width: 100%;
+}
+
 .schedule-grid {
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
     width: 100%;
+    animation: gridFade 0.22s ease-out;
 }
 
+@keyframes gridFade {
+    from {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Redesigned Rounded Class Card */
 .class-card {
     background-color: var(--surface-color);
     border: 1px solid var(--outline-color);
-    border-radius: 12px;
-    padding: 1.1rem 1.25rem;
+    border-radius: 18px;
+    padding: 1.05rem 1.35rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    transition: border-color 0.15s ease;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .class-card:hover {
     border-color: var(--accent-color);
+    background-color: color-mix(in srgb, var(--accent-color) 3.5%, var(--surface-color));
 }
 
 .class-left {
     display: flex;
     align-items: center;
-    gap: 1.1rem;
+    gap: 1.15rem;
 }
 
+/* Circular Period Badge with Mono Typography */
 .period-badge {
-    background-color: var(--surface-variant);
-    border: 1px solid var(--outline-color);
-    color: var(--text-primary);
+    background-color: color-mix(in srgb, var(--accent-color) 12%, var(--surface-color));
+    border: 1px solid color-mix(in srgb, var(--accent-color) 28%, transparent);
+    color: var(--accent-color);
     width: 44px;
     height: 44px;
-    border-radius: 10px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     flex-shrink: 0;
-    user-select: none;
-    -webkit-user-select: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.class-card:hover .period-badge {
+    background-color: color-mix(in srgb, var(--accent-color) 20%, var(--surface-color));
+    border-color: var(--accent-color);
 }
 
 .class-info {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.28rem;
 }
 
 .class-name {
-    font-size: 1.1rem;
+    font-size: 1.08rem;
     font-weight: 600;
     color: var(--text-primary);
+    letter-spacing: -0.01em;
 }
 
 .class-teacher {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 
+.class-teacher svg {
+    color: var(--text-secondary);
+    opacity: 0.85;
+    flex-shrink: 0;
+}
+
+/* Pill Room Badge with Map Pin Icon */
 .class-room-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     background-color: var(--surface-variant);
     border: 1px solid var(--outline-color);
     color: var(--text-secondary);
-    padding: 0.35rem 0.75rem;
-    border-radius: 8px;
-    font-size: 0.85rem;
+    padding: 0.38rem 0.85rem;
+    border-radius: 9999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.84rem;
     font-weight: 500;
-    user-select: none;
-    -webkit-user-select: none;
     white-space: nowrap;
+    transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-/* Verification Gate Modal */
-.auth-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(18, 16, 22, 0.92);
-    backdrop-filter: blur(6px);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    opacity: 1;
-    transition: opacity 0.25s ease, visibility 0.25s ease;
-}
-
-.auth-modal-overlay.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-.auth-modal-container {
-    background-color: var(--surface-color);
-    border: 1px solid var(--outline-color);
-    border-radius: 16px;
-    width: 100%;
-    max-width: 440px;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    box-shadow: none;
-}
-
-.auth-modal-title {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.auth-modal-description {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    line-height: 1.45;
-}
-
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-}
-
-.auth-input {
-    width: 100%;
-    background-color: var(--bg-color);
-    border: 1px solid var(--outline-color);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    color: var(--text-primary);
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.15s ease;
-}
-
-.auth-input:focus {
-    border-color: var(--accent-color);
-}
-
-.auth-error {
-    color: var(--error-color);
-    font-size: 0.85rem;
-    display: none;
-}
-
-.auth-submit-btn {
-    background-color: var(--accent-color);
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.15s ease;
-    user-select: none;
-    -webkit-user-select: none;
-}
-
-.auth-submit-btn:hover {
+.class-room-badge svg {
+    color: var(--accent-color);
     opacity: 0.9;
+    flex-shrink: 0;
+}
+
+.class-card:hover .class-room-badge {
+    border-color: color-mix(in srgb, var(--accent-color) 40%, transparent);
+    color: var(--text-primary);
 }
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
-    body {
-        padding-top: 0;
-    }
-
     .back-link {
         position: relative;
         top: auto;
         left: auto;
         align-self: flex-start;
         width: auto;
-        margin: 1rem 1.25rem 0.5rem;
+        margin: 0.6rem 0.85rem 0.4rem;
+    }
+
+    .portal-container {
+        padding: 15px 15px 40px;
+    }
+
+    .portal-title {
+        font-size: 1.85rem;
+    }
+
+    .class-card {
+        padding: 0.95rem 1.1rem;
+        border-radius: 16px;
+    }
+
+    .period-badge {
+        width: 38px;
+        height: 38px;
+        font-size: 0.88rem;
+    }
+
+    .class-name {
+        font-size: 1rem;
+    }
+
+    .class-teacher {
+        font-size: 0.82rem;
     }
 }

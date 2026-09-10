@@ -52,7 +52,7 @@ img {
     background: var(--highlight-bg);
 }
 
-/* Custom Scrollbars */
+/* Custom Scrollbars - Theme Responsive & Rounded */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -63,18 +63,42 @@ img {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.16);
-    border-radius: 4px;
+    background: color-mix(in srgb, var(--on-surface, #e6e1e5) 18%, transparent);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary);
+    background: var(--primary, #8859ff);
+    border: 1px solid transparent;
+    background-clip: padding-box;
 }
 
-/* Firefox Support */
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+:root.light-mode ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--on-surface, #1d1b20) 22%, transparent);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+:root.light-mode ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary, #8859ff);
+    border: 1px solid transparent;
+    background-clip: padding-box;
+}
+
 * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+    scrollbar-color: color-mix(in srgb, var(--on-surface, #e6e1e5) 18%, transparent) transparent;
+}
+
+:root.light-mode * {
+    scrollbar-color: color-mix(in srgb, var(--on-surface, #1d1b20) 22%, transparent) transparent;
 }
 
 body,
@@ -135,6 +159,48 @@ svg {
     user-select: none;
 }
 
+.brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--on-surface);
+    letter-spacing: -0.01em;
+    justify-self: flex-start;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.pfp-wrapper-small {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+    clip-path: url('#active-clip') !important;
+    -webkit-clip-path: url('#active-clip') !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+}
+
+.pfp-wrapper-small img,
+.pfp-wrapper-small .pfp {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+    object-fit: cover !important;
+    display: block !important;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
 body {
     min-height: 100vh;
     background: var(--background);
@@ -162,8 +228,8 @@ body {
 
 .back-link {
     position: absolute;
-    top: 75px;
-    left: 30px;
+    top: calc(var(--astrong-header-height, 61.6px) + var(--astrong-header-spacing, 17.2px));
+    left: var(--astrong-header-left, 1.5rem);
     z-index: 1000;
     display: inline-flex;
     align-items: center;
@@ -220,9 +286,7 @@ body {
     background: color-mix(in srgb, var(--on-surface) 10%, transparent);
 }
 
-.navigation-controls button:active {
-    transform: scale(0.92);
-}
+
 
 #current-month-year {
     font-size: 1rem;
@@ -262,9 +326,7 @@ body {
     color: var(--on-primary-container, #ffffff);
 }
 
-.export-ics-btn:active {
-    transform: scale(0.95);
-}
+
 
 /* Material 3 Expressive Calendar Card */
 .calendar-card {
@@ -580,9 +642,7 @@ body {
     border-color: var(--on-surface-variant);
 }
 
-.settings-toggle:active {
-    transform: scale(0.92);
-}
+
 
 .settings-tray {
     background: var(--surface);
@@ -631,15 +691,41 @@ body {
 }
 
 .toggle-group {
-    display: flex;
+    position: relative;
+    display: inline-flex;
     background: var(--surface-variant);
     border: 1px solid var(--outline);
     border-radius: 20px;
     padding: 2px;
+    user-select: none;
+    -webkit-user-select: none;
+    isolation: isolate;
+}
+
+.toggle-group::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    width: calc(50% - 2px);
+    border-radius: 18px;
+    background: var(--primary);
+    transition: transform 0.35s cubic-bezier(0.34, 1.15, 0.64, 1);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.toggle-group[data-active="1"]::before,
+.toggle-group:has(.toggle-option:nth-child(2).active)::before {
+    transform: translateX(100%);
 }
 
 .toggle-option {
-    background: none;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    background: transparent !important;
     border: none;
     color: var(--on-surface-variant);
     font-size: 0.7rem;
@@ -647,17 +733,19 @@ body {
     padding: 4px 12px;
     border-radius: 18px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: color 0.25s ease;
     user-select: none;
     -webkit-user-select: none;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .toggle-option:hover {
     color: var(--on-surface);
 }
 
-.toggle-option.active {
-    background: var(--primary);
+.toggle-option.active,
+.toggle-option.active:hover {
     color: var(--on-primary, #ffffff);
 }
 
@@ -689,9 +777,7 @@ body {
     color: var(--on-primary-container);
 }
 
-.export-tray-btn:active {
-    transform: scale(0.95);
-}
+
 
 /* View Switcher */
 .view-switcher-container {
@@ -701,15 +787,41 @@ body {
 }
 
 .view-switcher {
-    display: flex;
+    position: relative;
+    display: inline-flex;
     background: var(--surface-variant);
     border: 1px solid var(--outline);
     border-radius: 20px;
     padding: 2px;
+    user-select: none;
+    -webkit-user-select: none;
+    isolation: isolate;
+}
+
+.view-switcher::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    width: calc(50% - 2px);
+    border-radius: 18px;
+    background: var(--primary);
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.view-switcher[data-active="1"]::before,
+.view-switcher:has(.switcher-btn:nth-child(2).active)::before {
+    transform: translateX(100%);
 }
 
 .switcher-btn {
-    background: none;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    background: transparent !important;
     border: none;
     color: var(--on-surface-variant);
     font-size: 0.75rem;
@@ -717,17 +829,19 @@ body {
     padding: 5px 12px;
     border-radius: 18px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: color 0.25s ease;
     user-select: none;
     -webkit-user-select: none;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .switcher-btn:hover {
     color: var(--on-surface);
 }
 
-.switcher-btn.active {
-    background: var(--primary);
+.switcher-btn.active,
+.switcher-btn.active:hover {
     color: var(--on-primary, #ffffff);
 }
 
@@ -750,8 +864,8 @@ body {
 }
 
 .agenda-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.16);
-    border-radius: 3px;
+    background: color-mix(in srgb, var(--on-surface, #e6e1e5) 18%, transparent);
+    border-radius: 9999px;
 }
 
 .agenda-list::-webkit-scrollbar-thumb:hover {
@@ -950,7 +1064,7 @@ body {
         left: auto;
         align-self: flex-start;
         width: auto;
-        margin: 1rem 1.25rem 0.5rem;
+        margin: 0.6rem 0.85rem 0.4rem;
     }
 
     .calendar-container {

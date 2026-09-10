@@ -724,6 +724,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentView = "month";
             btnViewMonth.classList.add("active");
             btnViewAgenda.classList.remove("active");
+            btnViewMonth.closest('.view-switcher')?.setAttribute('data-active', '0');
             renderAll();
         });
 
@@ -731,6 +732,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentView = "agenda";
             btnViewAgenda.classList.add("active");
             btnViewMonth.classList.remove("active");
+            btnViewAgenda.closest('.view-switcher')?.setAttribute('data-active', '1');
             renderAll();
         });
     }
@@ -748,6 +750,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("time-format-pref", "12h");
             btnFormat12h.classList.add("active");
             btnFormat24h.classList.remove("active");
+            btnFormat12h.closest('.toggle-group')?.setAttribute('data-active', '0');
             renderAll();
         });
 
@@ -756,6 +759,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("time-format-pref", "24h");
             btnFormat24h.classList.add("active");
             btnFormat12h.classList.remove("active");
+            btnFormat24h.closest('.toggle-group')?.setAttribute('data-active', '1');
             renderAll();
         });
     }
@@ -766,6 +770,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("week-start-pref", "sun");
             btnWeekSun.classList.add("active");
             btnWeekMon.classList.remove("active");
+            btnWeekSun.closest('.toggle-group')?.setAttribute('data-active', '0');
             renderAll();
         });
 
@@ -774,6 +779,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("week-start-pref", "mon");
             btnWeekMon.classList.add("active");
             btnWeekSun.classList.remove("active");
+            btnWeekMon.closest('.toggle-group')?.setAttribute('data-active', '1');
             renderAll();
         });
     }
@@ -784,6 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("show-adjacent-pref", "true");
             btnAdjacentOn.classList.add("active");
             btnAdjacentOff.classList.remove("active");
+            btnAdjacentOn.closest('.toggle-group')?.setAttribute('data-active', '0');
             renderAll();
         });
 
@@ -792,6 +799,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("show-adjacent-pref", "false");
             btnAdjacentOff.classList.add("active");
             btnAdjacentOn.classList.remove("active");
+            btnAdjacentOff.closest('.toggle-group')?.setAttribute('data-active', '1');
             renderAll();
         });
     }
@@ -827,14 +835,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnFormat12h && btnFormat24h) {
         btnFormat12h.classList.toggle("active", timeFormat === "12h");
         btnFormat24h.classList.toggle("active", timeFormat === "24h");
+        btnFormat12h.closest('.toggle-group')?.setAttribute('data-active', timeFormat === "12h" ? "0" : "1");
     }
     if (btnWeekSun && btnWeekMon) {
         btnWeekSun.classList.toggle("active", weekStart === "sun");
         btnWeekMon.classList.toggle("active", weekStart === "mon");
+        btnWeekSun.closest('.toggle-group')?.setAttribute('data-active', weekStart === "sun" ? "0" : "1");
     }
     if (btnAdjacentOn && btnAdjacentOff) {
         btnAdjacentOn.classList.toggle("active", showAdjacentDays);
         btnAdjacentOff.classList.toggle("active", !showAdjacentDays);
+        btnAdjacentOn.closest('.toggle-group')?.setAttribute('data-active', showAdjacentDays ? "0" : "1");
+    }
+    if (btnViewMonth && btnViewAgenda) {
+        btnViewMonth.closest('.view-switcher')?.setAttribute('data-active', currentView === "month" ? "0" : "1");
     }
 
     renderAll();

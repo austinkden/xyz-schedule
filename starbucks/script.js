@@ -344,18 +344,21 @@ document.addEventListener("DOMContentLoaded", () => {
         timeFormat = f; localStorage.setItem("time-format-pref", f);
         btnFormat12h.classList.toggle("active", f === "12h");
         btnFormat24h.classList.toggle("active", f === "24h");
+        btnFormat12h.closest('.toggle-group')?.setAttribute('data-active', f === "12h" ? "0" : "1");
         renderAll();
     }
     function setWeekStart(v) {
         weekStart = v; localStorage.setItem("week-start-pref", v);
         btnWeekSun.classList.toggle("active", v === "sun");
         btnWeekMon.classList.toggle("active", v === "mon");
+        btnWeekSun.closest('.toggle-group')?.setAttribute('data-active', v === "sun" ? "0" : "1");
         renderAll();
     }
     function setAdjacentDays(v) {
         showAdjacentDays = v; localStorage.setItem("show-adjacent-pref", String(v));
         btnAdjacentOn.classList.toggle("active", v);
         btnAdjacentOff.classList.toggle("active", !v);
+        btnAdjacentOn.closest('.toggle-group')?.setAttribute('data-active', v ? "0" : "1");
         renderAll();
     }
 
@@ -363,6 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentView = view;
         btnViewMonth.classList.toggle("active", view === "month");
         btnViewAgenda.classList.toggle("active", view === "agenda");
+        btnViewMonth.closest('.view-switcher')?.setAttribute('data-active', view === "month" ? "0" : "1");
         renderAll();
     }
 
@@ -421,10 +425,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Init UI state from localStorage (single render)
     btnFormat12h.classList.toggle("active", timeFormat === "12h");
     btnFormat24h.classList.toggle("active", timeFormat === "24h");
+    btnFormat12h.closest('.toggle-group')?.setAttribute('data-active', timeFormat === "12h" ? "0" : "1");
     btnWeekSun.classList.toggle("active", weekStart === "sun");
     btnWeekMon.classList.toggle("active", weekStart === "mon");
+    btnWeekSun.closest('.toggle-group')?.setAttribute('data-active', weekStart === "sun" ? "0" : "1");
     btnAdjacentOn.classList.toggle("active", showAdjacentDays);
     btnAdjacentOff.classList.toggle("active", !showAdjacentDays);
+    btnAdjacentOn.closest('.toggle-group')?.setAttribute('data-active', showAdjacentDays ? "0" : "1");
+    btnViewMonth.closest('.view-switcher')?.setAttribute('data-active', currentView === "month" ? "0" : "1");
 
     renderAll();
 

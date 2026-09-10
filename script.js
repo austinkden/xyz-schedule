@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Pre-sample and align points for all shapes
         const numPoints = 120;
         const shapePoints = {};
-        let currentShapeIndex = 3; // Default to 'nine-sided-cookie'
+        let currentShapeIndex = 2; // Default to 'nine-sided-cookie'
 
         const alignPoints = (points) => {
             let minD = Infinity;
@@ -122,31 +122,39 @@ document.addEventListener('DOMContentLoaded', () => {
             animationFrameId = requestAnimationFrame(tick);
         };
 
-        let rotationAngle = 0;
-        let rotationDirection = 1; // 1 = clockwise, -1 = counter-clockwise
-        let speedMultiplier = 1;
-        let lastTime = performance.now();
+        const isIconContent = !!wrapper.querySelector('.pfp-icon-content') || !wrapper.querySelector('img');
 
-        const rotateLoop = (time) => {
-            const dt = (time - lastTime) / 1000;
-            lastTime = time;
+        if (!isIconContent) {
+            let rotationAngle = 0;
+            let rotationDirection = 1; // 1 = clockwise, -1 = counter-clockwise
+            let speedMultiplier = 1;
+            let lastTime = performance.now();
 
-            // 36 degrees per second is 360deg over 10 seconds
-            rotationAngle += rotationDirection * 36 * speedMultiplier * dt;
-            rotationAngle = rotationAngle % 360;
+            const rotateLoop = (time) => {
+                const dt = (time - lastTime) / 1000;
+                lastTime = time;
 
-            wrapper.style.transform = `rotate(${rotationAngle}deg)`;
-            img.style.transform = `rotate(${-rotationAngle}deg)`;
+                // 36 degrees per second is 360deg over 10 seconds
+                rotationAngle += rotationDirection * 36 * speedMultiplier * dt;
+                rotationAngle = rotationAngle % 360;
 
+                wrapper.style.transform = `rotate(${rotationAngle}deg)`;
+                img.style.transform = `rotate(${-rotationAngle}deg)`;
+
+                requestAnimationFrame(rotateLoop);
+            };
             requestAnimationFrame(rotateLoop);
-        };
-        requestAnimationFrame(rotateLoop);
+        } else {
+            wrapper.style.transform = '';
+            img.style.transform = '';
+        }
 
         let speedTimeoutId = null;
         let decelerateFrameId = null;
         const fastMultiplier = 6;
 
         const temporarySpeedUp = () => {
+            if (isIconContent) return;
             if (speedTimeoutId) clearTimeout(speedTimeoutId);
             if (decelerateFrameId) cancelAnimationFrame(decelerateFrameId);
 
@@ -187,7 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (shapePoints[targetShape]) {
                 animatePath(shapePoints[targetShape], 300);
-                temporarySpeedUp();
+                if (!isIconContent) {
+                    temporarySpeedUp();
+                }
             }
 
             // Reset the auto-cycle timer whenever the shape is cycled (either manually or automatically)
@@ -198,12 +208,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const startAutoCycle = () => {
             stopAutoCycle();
             // Only auto-cycle shape on the root homepage index.html
-            const isRootHome = document.title === 'Austin Strong';
+            const isRootHome = !isIconContent && document.title === 'Austin Strong';
             if (!isRootHome) return;
 
             autoCycleInterval = setInterval(() => {
                 cycleShape();
-            }, 7500);
+            }, 5000);
         };
         const stopAutoCycle = () => {
             if (autoCycleInterval) {
@@ -216,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startAutoCycle();
 
         const reverseRotation = () => {
+            if (isIconContent) return;
             rotationDirection *= -1;
         };
 
@@ -235,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            if (isIconContent) return;
             const isTouch = e.pointerType === 'touch' || ('ontouchstart' in window && !window.matchMedia('(pointer: fine)').matches);
             if (isTouch) {
                 if (!hasReversedThisPress) {
@@ -248,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Mobile Long Press & PointerEvents
         wrapper.addEventListener('pointerdown', (e) => {
+            if (isIconContent) return;
             if (e.pointerType === 'mouse' && e.button === 2) {
                 return;
             }
