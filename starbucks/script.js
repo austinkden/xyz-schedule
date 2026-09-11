@@ -746,6 +746,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (Object.keys(liveSchedule).length > 0) {
+            console.log(`[Starbucks Schedule] Loaded ${Object.keys(liveSchedule).length} shift day(s) from live calendar`);
             window.STARBUCKS_SCHEDULE = Object.assign({}, window.STARBUCKS_SCHEDULE || {}, liveSchedule);
             try {
                 const rawCache = localStorage.getItem(CACHE_KEY);
