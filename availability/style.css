@@ -122,7 +122,8 @@ body {
     margin-bottom: -10px;
     width: clamp(80px, 8vw, 100px);
     height: clamp(80px, 8vw, 100px);
-    clip-path: url('#active-clip');
+    border-radius: 50%;
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -157,13 +158,14 @@ body {
     min-height: 28px !important;
     max-width: 28px !important;
     max-height: 28px !important;
-    clip-path: url('#active-clip') !important;
-    -webkit-clip-path: url('#active-clip') !important;
+    border-radius: 50%;
+    overflow: hidden;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     flex-shrink: 0 !important;
     overflow: hidden !important;
+    cursor: pointer !important;
 }
 
 .pfp-wrapper-small img,
@@ -177,6 +179,7 @@ body {
     user-select: none;
     -webkit-user-select: none;
     -webkit-user-drag: none;
+    cursor: pointer !important;
 }
 
 .pfp-icon-content {

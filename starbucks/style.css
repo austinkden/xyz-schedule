@@ -179,13 +179,14 @@ svg {
     min-height: 28px !important;
     max-width: 28px !important;
     max-height: 28px !important;
-    clip-path: url('#active-clip') !important;
-    -webkit-clip-path: url('#active-clip') !important;
+    border-radius: 50%;
+    overflow: hidden;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     flex-shrink: 0 !important;
     overflow: hidden !important;
+    cursor: pointer !important;
 }
 
 .pfp-wrapper-small img,
@@ -199,6 +200,7 @@ svg {
     user-select: none;
     -webkit-user-select: none;
     -webkit-user-drag: none;
+    cursor: pointer !important;
 }
 
 body {
